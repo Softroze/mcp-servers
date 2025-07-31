@@ -1,0 +1,50 @@
+[nix]
+channel = "stable-25_05"
+
+modules = ["nodejs-20"]
+
+[workflows]
+runButton = "Start Server"
+
+[[workflows.workflow]]
+name = "Start Documentation Server"
+author = 35427550
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start || node server.js"
+
+[[workflows.workflow]]
+name = "Alternative Start"
+author = 35427550
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "which node || echo \"Node.js not found, checking installation...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node --version || echo \"Installing Node.js...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[workflows.workflow]]
+name = "Start Server"
+author = 35427550
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
