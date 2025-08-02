@@ -1,4 +1,3 @@
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -37,7 +36,7 @@ class UnifiedAgentSystem {
     } = taskConfig;
 
     const results = {};
-    
+
     try {
       switch (collaborationMode) {
         case 'parallel':
@@ -92,7 +91,7 @@ class UnifiedAgentSystem {
       try {
         const result = await this.executeOnSystem(systemName, currentTask);
         results.push(result);
-        
+
         // استخدام نتيجة النظام السابق كمدخل للتالي
         if (result.success && result.result) {
           currentTask = {
@@ -132,7 +131,7 @@ class UnifiedAgentSystem {
       });
 
       const enhancements = await Promise.all(enhancementTasks);
-      
+
       return {
         primary: primaryResult,
         enhancements: enhancements,
@@ -154,7 +153,7 @@ class UnifiedAgentSystem {
 
     // تحليل النتائج لإيجاد الإجماع
     const consensus = this.findConsensusAmongResults(successfulResults);
-    
+
     return {
       consensus: consensus.found,
       results: results,
@@ -167,10 +166,10 @@ class UnifiedAgentSystem {
   // تنفيذ على نظام معين
   async executeOnSystem(systemName, task) {
     const startTime = Date.now();
-    
+
     try {
       let result;
-      
+
       switch (systemName) {
         case 'mcp':
           result = await this.mcp.executeIntelligent({
@@ -178,33 +177,33 @@ class UnifiedAgentSystem {
             optimization: 'balanced'
           });
           break;
-          
+
         case 'autogen':
           // إنشاء محادثة جماعية لـ AutoGen
           const chatId = `chat-${Date.now()}`;
           const agents = ['analyst', 'generator', 'reviewer'];
-          
+
           this.autogen.createGroupChat(chatId, agents, 'analyst');
           result = await this.autogen.initiateGroupChat(chatId, task.description || task.query);
           break;
-          
+
         case 'superagent':
           const agentId = this.findBestSuperAgent(task);
           result = await this.superagent.executeSuperAgentTask(agentId, task);
           break;
-          
+
         case 'crewai':
           // إنشاء طاقم ديناميكي حسب المهمة
           const crewId = `crew-${Date.now()}`;
           const crew = this.crewai.createCompleteCrewForTask('dynamic-task', task.description);
           result = await this.crewai.executeCrew(crew.id, { task: task });
           break;
-          
+
         case 'semantickernel':
           const semanticAgentId = this.findBestSemanticAgent(task);
           result = await this.semantickernel.executeSemanticTask(semanticAgentId, task);
           break;
-          
+
         default:
           throw new Error(`Unknown system: ${systemName}`);
       }
@@ -256,55 +255,55 @@ class UnifiedAgentSystem {
   // حساب نقاط MCP
   calculateMCPScore(task) {
     let score = 0.5; // نقطة أساسية
-    
+
     if (task.type === 'collaboration') score += 0.3;
     if (task.complexity === 'high') score += 0.2;
     if (task.requirements?.includes('orchestration')) score += 0.3;
-    
+
     return Math.min(score, 1.0);
   }
 
   // حساب نقاط AutoGen
   calculateAutoGenScore(task) {
     let score = 0.4;
-    
+
     if (task.type === 'conversation' || task.type === 'chat') score += 0.4;
     if (task.requirements?.includes('multi-agent-chat')) score += 0.3;
     if (task.description?.includes('محادثة') || task.description?.includes('chat')) score += 0.2;
-    
+
     return Math.min(score, 1.0);
   }
 
   // حساب نقاط SuperAgent
   calculateSuperAgentScore(task) {
     let score = 0.4;
-    
+
     if (task.type === 'workflow') score += 0.3;
     if (task.requirements?.includes('tools')) score += 0.3;
     if (task.complexity === 'medium') score += 0.2;
-    
+
     return Math.min(score, 1.0);
   }
 
   // حساب نقاط CrewAI
   calculateCrewAIScore(task) {
     let score = 0.4;
-    
+
     if (task.type === 'project' || task.type === 'team-work') score += 0.4;
     if (task.requirements?.includes('role-based')) score += 0.3;
     if (task.complexity === 'high') score += 0.2;
-    
+
     return Math.min(score, 1.0);
   }
 
   // حساب نقاط Semantic Kernel
   calculateSemanticKernelScore(task) {
     let score = 0.6; // نقطة عالية لأنه متقدم
-    
+
     if (task.type === 'analysis' || task.type === 'planning') score += 0.3;
     if (task.requirements?.includes('semantic-understanding')) score += 0.3;
     if (task.description?.includes('تحليل') || task.description?.includes('خطة')) score += 0.2;
-    
+
     return Math.min(score, 1.0);
   }
 
@@ -317,11 +316,11 @@ class UnifiedAgentSystem {
   // العثور على أفضل وكيل Semantic Kernel
   findBestSemanticAgent(task) {
     const agents = this.semantickernel.getAllSemanticAgents();
-    
+
     if (task.type === 'analysis') return 'semantic-analyst';
     if (task.type === 'planning') return 'semantic-planner';
     if (task.type === 'conversation') return 'semantic-conversationalist';
-    
+
     return agents.length > 0 ? agents[0].id : 'semantic-analyst';
   }
 
@@ -359,7 +358,7 @@ class UnifiedAgentSystem {
     // خوارزمية بسيطة للإجماع
     const outputs = results.map(r => r.result.output || r.result.response || '');
     const similarities = this.calculateSimilarities(outputs);
-    
+
     if (similarities.averageSimilarity > 0.7) {
       return {
         found: true,
@@ -381,9 +380,9 @@ class UnifiedAgentSystem {
     const avgLength = outputs.reduce((sum, output) => sum + output.length, 0) / outputs.length;
     const lengthVariation = outputs.reduce((sum, output) => 
       sum + Math.abs(output.length - avgLength), 0) / outputs.length;
-    
+
     const similarity = Math.max(0, 1 - (lengthVariation / avgLength));
-    
+
     return {
       averageSimilarity: similarity,
       details: { avgLength, lengthVariation }
@@ -402,11 +401,11 @@ class UnifiedAgentSystem {
   // حساب نقاط النتيجة
   calculateResultScore(result) {
     let score = 0;
-    
+
     if (result.success) score += 0.5;
     if (result.result?.confidence) score += result.result.confidence * 0.3;
     if (result.executionTime) score += Math.max(0, 0.2 - (result.executionTime / 10000));
-    
+
     return score;
   }
 
@@ -414,13 +413,13 @@ class UnifiedAgentSystem {
   async fallbackToBestSystem(task, originalError) {
     const systemHealth = await this.checkSystemsHealth();
     const availableSystems = Object.keys(systemHealth).filter(s => systemHealth[s].available);
-    
+
     if (availableSystems.length === 0) {
       throw new Error(`All systems unavailable. Original error: ${originalError.message}`);
     }
 
     const bestSystem = availableSystems[0]; // أبسط اختيار
-    
+
     try {
       const result = await this.executeOnSystem(bestSystem, task);
       return {
@@ -505,12 +504,12 @@ const server = http.createServer(async (req, res) => {
       req.on('data', chunk => {
         body += chunk.toString();
       });
-      
+
       req.on('end', async () => {
         try {
           const { action, data } = JSON.parse(body);
           let result;
-          
+
           switch(action) {
             case 'execute-hierarchical':
               result = await orchestrator.executeHierarchical(data.tasks, data.masterAgent);
@@ -601,7 +600,7 @@ const server = http.createServer(async (req, res) => {
             default:
               throw new Error(`Action غير مدعوم: ${action}`);
           }
-          
+
           res.writeHead(200, { 
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
@@ -628,12 +627,12 @@ const server = http.createServer(async (req, res) => {
       req.on('data', chunk => {
         body += chunk.toString();
       });
-      
+
       req.on('end', async () => {
         try {
           const { provider, message, options } = JSON.parse(body);
           const response = await aiService.sendRequest(provider, message, options);
-          
+
           res.writeHead(200, { 
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
@@ -709,12 +708,222 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
+// API للحصول على قائمة الوكلاء مع التفاصيل
+server.get('/api/agents', (req, res) => {
+  const agents = Array.from(orchestrator.agents.values());
+  const groups = Array.from(orchestrator.agentGroups.values());
+  const stats = orchestrator.getSystemStats();
+
+  res.json({
+    success: true,
+    agents: agents,
+    groups: groups.map(g => ({
+      id: g.id,
+      type: g.type,
+      agentCount: g.agents.length,
+      agents: g.agents.map(a => a.name)
+    })),
+    statistics: stats,
+    integrations: {
+      mcp: agents.filter(a => a.type === 'mcp').length,
+      autogen: autoGen.conversableAgents.size,
+      superagent: superAgent.agents.size,
+      crewai: crewAI.agents.size,
+      semanticKernel: semanticKernel.agents.size
+    }
+  });
+});
+
+// API لتنفيذ المهام مع دعم جميع الأنظمة
+server.post('/api/execute', async (req, res) => {
+  try {
+    const { 
+      task, 
+      agent_id, 
+      execution_type = 'intelligent',
+      integration_type = 'mcp',
+      collaboration_strategy = 'auto'
+    } = req.body;
+
+    let result;
+
+    switch (integration_type) {
+      case 'mcp':
+        if (execution_type === 'hierarchical') {
+          result = await orchestrator.executeHierarchical([task], agent_id);
+        } else if (execution_type === 'parallel') {
+          result = await orchestrator.executeParallel([task]);
+        } else if (execution_type === 'intelligent') {
+          result = await orchestrator.executeIntelligent({ 
+            tasks: [task], 
+            optimization: 'balanced' 
+          });
+        } else {
+          result = await orchestrator.executeTask(agent_id, task);
+        }
+        break;
+
+      case 'autogen':
+        const chatId = `chat-${Date.now()}`;
+        autoGen.createGroupChat(chatId, [agent_id], agent_id);
+        result = await autoGen.initiateGroupChat(chatId, task.description || task.query);
+        break;
+
+      case 'superagent':
+        result = await superAgent.executeSuperAgentTask(agent_id, task);
+        break;
+
+      case 'crewai':
+        result = await crewAI.executeCrew(agent_id, { task: task.description });
+        break;
+
+      case 'semantic-kernel':
+        result = await semanticKernel.executeSemanticTask(agent_id, task);
+        break;
+
+      case 'collaborative':
+        const groupId = req.body.group_id || 'analysis-team';
+        result = await orchestrator.executeCollaborativeTask({
+          task: task,
+          groupId: groupId,
+          collaborationStrategy: collaboration_strategy,
+          synchronization: 'async'
+        });
+        break;
+
+      default:
+        result = await orchestrator.executeTask(agent_id, task);
+    }
+
+    res.json({
+      success: true,
+      result: result,
+      executionType: execution_type,
+      integrationType: integration_type,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    console.error('خطأ في تنفيذ المهمة:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: error.stack
+    });
+  }
+});
+
+// إحصائيات النظام الشاملة
+server.get('/api/stats', (req, res) => {
+  const mcpStats = orchestrator.getSystemStats();
+  const collabStats = orchestrator.getCollaborationStats();
+  const autoGenStats = autoGen.getAutoGenStats();
+  const superAgentStats = superAgent.getSuperAgentStats();
+  const crewAIStats = crewAI.getCrewAIStats();
+
+  res.json({
+    success: true,
+    timestamp: new Date(),
+    systemHealth: mcpStats.systemHealth,
+    totalAgents: mcpStats.totalAgents + autoGenStats.totalAgents + superAgentStats.totalAgents + crewAIStats.totalAgents,
+    statistics: {
+      mcp: mcpStats,
+      collaboration: collabStats,
+      autogen: autoGenStats,
+      superagent: superAgentStats,
+      crewai: crewAIStats,
+      semanticKernel: {
+        totalAgents: semanticKernel.agents ? semanticKernel.agents.size : 0,
+        availableSkills: semanticKernel.skills ? semanticKernel.skills.size : 0
+      }
+    }
+  });
+});
+
+// API لاختبار الوكلاء
+server.post('/api/test-agents', async (req, res) => {
+  try {
+    const testTask = {
+      type: 'analysis',
+      description: 'اختبار أداء الوكلاء',
+      query: 'مرحبا، هذا اختبار لتأكيد عمل الوكلاء'
+    };
+
+    const results = [];
+
+    // اختبار وكلاء MCP
+    const mcpAgents = Array.from(orchestrator.agents.values()).slice(0, 2);
+    for (const agent of mcpAgents) {
+      try {
+        const result = await orchestrator.executeTask(agent.id, testTask);
+        results.push({
+          system: 'MCP',
+          agentId: agent.id,
+          agentName: agent.name,
+          success: result.success,
+          responseTime: result.executionTime
+        });
+      } catch (error) {
+        results.push({
+          system: 'MCP',
+          agentId: agent.id,
+          agentName: agent.name,
+          success: false,
+          error: error.message
+        });
+      }
+
+      // توقف قصير بين الاختبارات
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    // اختبار AutoGen
+    try {
+      const chatId = `test-chat-${Date.now()}`;
+      const agentIds = Array.from(autoGen.conversableAgents.keys()).slice(0, 2);
+      if (agentIds.length > 0) {
+        autoGen.createGroupChat(chatId, agentIds, agentIds[0]);
+        const result = await autoGen.initiateGroupChat(chatId, testTask.description);
+        results.push({
+          system: 'AutoGen',
+          agentId: chatId,
+          success: result.status === 'completed',
+          responseTime: Date.now() - new Date(result.startTime).getTime()
+        });
+      }
+    } catch (error) {
+      results.push({
+        system: 'AutoGen',
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      testResults: results,
+      summary: {
+        totalTests: results.length,
+        successfulTests: results.filter(r => r.success).length,
+        averageResponseTime: results
+          .filter(r => r.responseTime)
+          .reduce((sum, r) => sum + r.responseTime, 0) / 
+          Math.max(results.filter(r => r.responseTime).length, 1)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 const port = process.env.PORT || 5000;
 server.listen(port, '0.0.0.0', async () => {
   console.log(`🚀 الخادم يعمل الآن على: http://0.0.0.0:${port}/`);
   console.log(`📊 لوحة التحكم الموحدة: http://0.0.0.0:${port}/unified-dashboard.html`);
   console.log(`🤖 واجهة إدارة الوكلاء: http://0.0.0.0:${port}/agent-management.html`);
-  
+
   try {
     // تهيئة Semantic Kernel
     await semanticKernel.initialize();
@@ -722,7 +931,7 @@ server.listen(port, '0.0.0.0', async () => {
   } catch (error) {
     console.log(`⚠️ تحذير: فشل في تهيئة Semantic Kernel: ${error.message}`);
   }
-  
+
   console.log(`✨ النظام الموحد للوكلاء الذكيين جاهز للاستخدام!`);
 });
 
