@@ -183,6 +183,7 @@ Web content access and automation capabilities. Enables searching, scraping, and
 - [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) - Official Microsoft Playwright MCP server, enabling LLMs to interact with web pages through structured accessibility snapshots
 - [modelcontextprotocol/server-puppeteer](https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer) 📇 🏠 - Browser automation for web scraping and interaction
 - [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) 📇 🏠 - High-level API to control Chrome/Chromium browsers for automation, testing, and web scraping
+- [fastapi/fastapi](https://github.com/fastapi/fastapi) 🐍 ☁️ 🏠 - Modern, fast web framework for building APIs with Python, featuring automatic interactive documentation and high performance
 - [ndthanhdev/mcp-browser-kit](https://github.com/ndthanhdev/mcp-browser-kit) 📇 🏠 - An MCP Server for interacting with manifest v2 compatible browsers.
 - [ndthanhdev/mcp-browser-kit](https://github.com/ndthanhdev/mcp-browser-kit) 📇 🏠 - An MCP Server that enables AI assistants to interact with your local browsers.
 - [operative_sh/web-eval-agent](https://github.com/Operative-Sh/web-eval-agent) 🐍 🏠 🍎 - An MCP Server that autonomously debugs web applications with browser-use browser agents

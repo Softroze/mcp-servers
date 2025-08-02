@@ -21,6 +21,7 @@
 - [juehang/vscode-mcp-server](https://github.com/juehang/vscode-mcp-server) - خادم MCP لـ VS Code
 - [jetbrains/mcpProxy](https://github.com/JetBrains/mcpProxy) - الاتصال بـ JetBrains IDE
 - [neovim/neovim](https://github.com/neovim/neovim) - محرر نصوص متقدم مع دعم واسع للإضافات وواجهة برمجية حديثة
+- [fastapi/fastapi](https://github.com/fastapi/fastapi) - إطار عمل ويب حديث وسريع لبناء APIs باستخدام Python مع توثيق تفاعلي تلقائي
 - [microsoft/markitdown](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp) - تحويل الملفات إلى Markdown
 
 ## 🗄️ قواعد البيانات والتخزين
