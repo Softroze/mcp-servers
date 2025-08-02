@@ -708,34 +708,46 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-// API للحصول على قائمة الوكلاء مع التفاصيل
-server.get('/api/agents', (req, res) => {
+// معالجة طلبات GET بسيطة للـ API
+server.on('request', (req, res) => {
+  if (req.method === 'GET' && req.url === '/api/agents') {
   const agents = Array.from(orchestrator.agents.values());
   const groups = Array.from(orchestrator.agentGroups.values());
   const stats = orchestrator.getSystemStats();
 
-  res.json({
-    success: true,
-    agents: agents,
-    groups: groups.map(g => ({
-      id: g.id,
-      type: g.type,
-      agentCount: g.agents.length,
-      agents: g.agents.map(a => a.name)
-    })),
-    statistics: stats,
-    integrations: {
-      mcp: agents.filter(a => a.type === 'mcp').length,
-      autogen: autoGen.conversableAgents.size,
-      superagent: superAgent.agents.size,
-      crewai: crewAI.agents.size,
-      semanticKernel: semanticKernel.agents.size
-    }
-  });
-});
+  const agents = Array.from(orchestrator.agents.values());
+    const groups = Array.from(orchestrator.agentGroups.values());
+    const stats = orchestrator.getSystemStats();
 
-// API لتنفيذ المهام مع دعم جميع الأنظمة
-server.post('/api/execute', async (req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      agents: agents,
+      groups: groups.map(g => ({
+        id: g.id,
+        type: g.type,
+        agentCount: g.agents.length,
+        agents: g.agents.map(a => a.name)
+      })),
+      statistics: stats,
+      integrations: {
+        mcp: agents.filter(a => a.type === 'mcp').length,
+        autogen: autoGen.conversableAgents.size,
+        superagent: superAgent.agents.size,
+        crewai: crewAI.agents.size,
+        semanticKernel: semanticKernel.agents ? semanticKernel.agents.size : 0
+      }
+    }));
+    return;
+  }
+
+if (req.method === 'POST' && req.url === '/api/execute') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
   try {
     const { 
       task, 
@@ -795,52 +807,68 @@ server.post('/api/execute', async (req, res) => {
         result = await orchestrator.executeTask(agent_id, task);
     }
 
-    res.json({
-      success: true,
-      result: result,
-      executionType: execution_type,
-      integrationType: integration_type,
-      timestamp: new Date()
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        result: result,
+        executionType: execution_type,
+        integrationType: integration_type,
+        timestamp: new Date()
+      }));
+    } catch (error) {
+      console.error('خطأ في تنفيذ المهمة:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        error: error.message,
+        details: error.stack
+      }));
+    }
     });
-  } catch (error) {
-    console.error('خطأ في تنفيذ المهمة:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      details: error.stack
-    });
+    return;
   }
-});
 
-// إحصائيات النظام الشاملة
-server.get('/api/stats', (req, res) => {
+if (req.method === 'GET' && req.url === '/api/stats') {
   const mcpStats = orchestrator.getSystemStats();
   const collabStats = orchestrator.getCollaborationStats();
   const autoGenStats = autoGen.getAutoGenStats();
   const superAgentStats = superAgent.getSuperAgentStats();
   const crewAIStats = crewAI.getCrewAIStats();
 
-  res.json({
-    success: true,
-    timestamp: new Date(),
-    systemHealth: mcpStats.systemHealth,
-    totalAgents: mcpStats.totalAgents + autoGenStats.totalAgents + superAgentStats.totalAgents + crewAIStats.totalAgents,
-    statistics: {
-      mcp: mcpStats,
-      collaboration: collabStats,
-      autogen: autoGenStats,
-      superagent: superAgentStats,
-      crewai: crewAIStats,
-      semanticKernel: {
-        totalAgents: semanticKernel.agents ? semanticKernel.agents.size : 0,
-        availableSkills: semanticKernel.skills ? semanticKernel.skills.size : 0
-      }
-    }
-  });
-});
+  const mcpStats = orchestrator.getSystemStats();
+    const collabStats = orchestrator.getCollaborationStats();
+    const autoGenStats = autoGen.getAutoGenStats();
+    const superAgentStats = superAgent.getSuperAgentStats();
+    const crewAIStats = crewAI.getCrewAIStats();
 
-// API لاختبار الوكلاء
-server.post('/api/test-agents', async (req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      timestamp: new Date(),
+      systemHealth: mcpStats.systemHealth,
+      totalAgents: mcpStats.totalAgents + autoGenStats.totalAgents + superAgentStats.totalAgents + crewAIStats.totalAgents,
+      statistics: {
+        mcp: mcpStats,
+        collaboration: collabStats,
+        autogen: autoGenStats,
+        superagent: superAgentStats,
+        crewai: crewAIStats,
+        semanticKernel: {
+          totalAgents: semanticKernel.agents ? semanticKernel.agents.size : 0,
+          availableSkills: semanticKernel.skills ? semanticKernel.skills.size : 0
+        }
+      }
+    }));
+    return;
+  }
+
+if (req.method === 'POST' && req.url === '/api/test-agents') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
   try {
     const testTask = {
       type: 'analysis',
@@ -898,25 +926,31 @@ server.post('/api/test-agents', async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      testResults: results,
-      summary: {
-        totalTests: results.length,
-        successfulTests: results.filter(r => r.success).length,
-        averageResponseTime: results
-          .filter(r => r.responseTime)
-          .reduce((sum, r) => sum + r.responseTime, 0) / 
-          Math.max(results.filter(r => r.responseTime).length, 1)
-      }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        testResults: results,
+        summary: {
+          totalTests: results.length,
+          successfulTests: results.filter(r => r.success).length,
+          averageResponseTime: results
+            .filter(r => r.responseTime)
+            .reduce((sum, r) => sum + r.responseTime, 0) / 
+            Math.max(results.filter(r => r.responseTime).length, 1)
+        }
+      }));
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        error: error.message
+      }));
+    }
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return;
   }
-});
+  
+  // باقي معالجات الطلبات...
 
 const port = process.env.PORT || 5000;
 server.listen(port, '0.0.0.0', async () => {
