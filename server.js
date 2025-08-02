@@ -4,9 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const AIService = require('./ai-service');
 const AgentOrchestrator = require('./agent-orchestrator');
+const AutoGenIntegration = require('./autogen-integration');
+const SuperAgentIntegration = require('./superagent-integration');
+const CrewAIIntegration = require('./crewai-integration');
 
 const aiService = new AIService();
 const orchestrator = new AgentOrchestrator();
+const autoGen = new AutoGenIntegration();
+const superAgent = new SuperAgentIntegration();
+const crewAI = new CrewAIIntegration();
 
 // تسجيل الوكلاء الافتراضية
 orchestrator.registerAgent('analysis-agent', {
@@ -88,6 +94,39 @@ const server = http.createServer(async (req, res) => {
               break;
             case 'get-collaboration-stats':
               result = orchestrator.getCollaborationStats();
+              break;
+            case 'autogen-create-agent':
+              result = autoGen.createConversableAgent(data.agentId, data.config);
+              break;
+            case 'autogen-group-chat':
+              result = await autoGen.initiateGroupChat(data.chatId, data.message);
+              break;
+            case 'autogen-stats':
+              result = autoGen.getAutoGenStats();
+              break;
+            case 'superagent-create':
+              result = superAgent.createSuperAgent(data.agentId, data.config);
+              break;
+            case 'superagent-execute':
+              result = await superAgent.executeSuperAgentTask(data.agentId, data.task);
+              break;
+            case 'superagent-workflow':
+              result = await superAgent.executeWorkflow(data.workflowId, data.input);
+              break;
+            case 'superagent-stats':
+              result = superAgent.getSuperAgentStats();
+              break;
+            case 'crewai-create-crew':
+              result = crewAI.createCrew(data.crewId, data.config);
+              break;
+            case 'crewai-execute':
+              result = await crewAI.executeCrew(data.crewId, data.inputs);
+              break;
+            case 'crewai-complete-project':
+              result = crewAI.createCompleteCrewForTask(data.projectName, data.taskDescription);
+              break;
+            case 'crewai-stats':
+              result = crewAI.getCrewAIStats();
               break;
             default:
               throw new Error(`Action غير مدعوم: ${action}`);
