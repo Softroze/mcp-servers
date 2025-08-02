@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>واجهة المحادثة التفاعلية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .message.system {
+            align-self: center;
+            background: rgba(255, 193, 7, 0.2);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            font-size: 14px;
+            max-width: 90%;
+        }
+        
+        .message.error {
+            align-self: center;
+            background: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            max-width: 90%;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .provider-select {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            resize: none;
+            max-height: 100px;
+        }
+        
+        .send-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .commands-help {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            max-width: 80px;
+            align-self: flex-start;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .message pre {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <h1>🤖 واجهة المحادثة التفاعلية مع الذكاء الاصطناعي</h1>
+        <p>تحدث مع النماذج المختلفة واستخدم الأوامر الخاصة</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="messages-container" id="messagesContainer">
+            <div class="message system">
+                مرحباً! يمكنك استخدام الأوامر التالية:<br>
+                <strong>/help</strong> - عرض المساعدة<br>
+                <strong>/clear</strong> - مسح المحادثة<br>
+                <strong>/info</strong> - معلومات النظام<br>
+                <strong>/models</strong> - عرض النماذج المتاحة<br>
+                أو اكتب رسالة عادية للتحدث مع الذكاء الاصطناعي
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-row">
+                <select class="provider-select" id="providerSelect">
+                    <option value="openai">OpenAI (GPT)</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="google">Google AI (Gemini)</option>
+                    <option value="huggingface">Hugging Face</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="اكتب رسالتك أو أمر هنا..."
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="sendButton">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatInterface {
+            constructor() {
+                this.messagesContainer = document.getElementById('messagesContainer');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.providerSelect = document.getElementById('providerSelect');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                
+                this.init();
+            }
+            
+            init() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                // تكييف حجم textarea
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 100) + 'px';
+                });
+            }
+            
+            addMessage(content, type = 'user', sender = '') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                if (type === 'ai' && sender) {
+                    content = `<strong>${sender}:</strong><br>${content}`;
+                }
+                
+                // تحويل النص إلى HTML وتنسيق الكود
+                content = this.formatMessage(content);
+                messageDiv.innerHTML = content;
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+            
+            formatMessage(text) {
+                // تحويل الأكواد المحاطة بـ ```
+                text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+                // تحويل الكود المحاط بـ `
+                text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+                // تحويل الأسطر الجديدة إلى <br>
+                text = text.replace(/\n/g, '<br>');
+                return text;
+            }
+            
+            showTyping() {
+                this.typingIndicator.style.display = 'block';
+                this.scrollToBottom();
+            }
+            
+            hideTyping() {
+                this.typingIndicator.style.display = 'none';
+            }
+            
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+            
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+                
+                const provider = this.providerSelect.value;
+                
+                // إضافة رسالة المستخدم
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.messageInput.style.height = 'auto';
+                
+                // معالجة الأوامر الخاصة
+                if (message.startsWith('/')) {
+                    this.handleCommand(message);
+                    return;
+                }
+                
+                // إظهار مؤشر الكتابة
+                this.showTyping();
+                this.sendButton.disabled = true;
+                this.sendButton.textContent = 'جاري الإرسال...';
+                
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            provider,
+                            message,
+                            options: {}
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    this.hideTyping();
+                    
+                    if (data.success) {
+                        this.addMessage(data.response, 'ai', this.getProviderName(provider));
+                    } else {
+                        this.addMessage(`خطأ: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.hideTyping();
+                    this.addMessage(`خطأ في الاتصال: ${error.message}`, 'error');
+                } finally {
+                    this.sendButton.disabled = false;
+                    this.sendButton.textContent = 'إرسال';
+                }
+            }
+            
+            handleCommand(command) {
+                const cmd = command.split(' ')[0].toLowerCase();
+                
+                switch(cmd) {
+                    case '/help':
+                        this.addMessage(`
+                            الأوامر المتاحة:<br>
+                            <strong>/help</strong> - عرض هذه المساعدة<br>
+                            <strong>/clear</strong> - مسح جميع المحادثات<br>
+                            <strong>/info</strong> - معلومات عن النظام<br>
+                            <strong>/models</strong> - عرض النماذج المتاحة<br>
+                            <strong>/time</strong> - عرض الوقت الحالي<br>
+                            <strong>/status</strong> - حالة الاتصال بالمزودين
+                        `, 'system');
+                        break;
+                        
+                    case '/clear':
+                        this.messagesContainer.innerHTML = '';
+                        this.addMessage('تم مسح المحادثة ✅', 'system');
+                        break;
+                        
+                    case '/info':
+                        this.addMessage(`
+                            معلومات النظام:<br>
+                            🌐 <strong>المتصفح:</strong> ${navigator.userAgent}<br>
+                            ⏰ <strong>الوقت:</strong> ${new Date().toLocaleString('ar-SA')}<br>
+                            🔗 <strong>الاتصال:</strong> ${navigator.onLine ? 'متصل' : 'غير متصل'}<br>
+                            🖥️ <strong>الدقة:</strong> ${screen.width}x${screen.height}
+                        `, 'system');
+                        break;
+                        
+                    case '/models':
+                        this.addMessage(`
+                            النماذج المتاحة:<br>
+                            🤖 <strong>OpenAI:</strong> GPT-3.5, GPT-4<br>
+                            🧠 <strong>Anthropic:</strong> Claude 3 Haiku, Sonnet, Opus<br>
+                            🔍 <strong>Google:</strong> Gemini Pro<br>
+                            🤗 <strong>Hugging Face:</strong> نماذج مختلفة مفتوحة المصدر
+                        `, 'system');
+                        break;
+                        
+                    case '/time':
+                        this.addMessage(`الوقت الحالي: ${new Date().toLocaleString('ar-SA')} ⏰`, 'system');
+                        break;
+                        
+                    case '/status':
+                        this.checkProviderStatus();
+                        break;
+                        
+                    default:
+                        this.addMessage(`أمر غير معروف: ${cmd}. استخدم /help لعرض الأوامر المتاحة.`, 'error');
+                }
+            }
+            
+            async checkProviderStatus() {
+                this.addMessage('جاري فحص حالة المزودين...', 'system');
+                
+                const providers = ['openai', 'anthropic', 'google', 'huggingface'];
+                let statusMessage = 'حالة المزودين:<br>';
+                
+                for (const provider of providers) {
+                    try {
+                        const response = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                provider,
+                                message: 'test',
+                                options: { maxTokens: 10 }
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        const status = data.success ? '✅ متاح' : '❌ غير متاح';
+                        statusMessage += `<strong>${this.getProviderName(provider)}:</strong> ${status}<br>`;
+                    } catch (error) {
+                        statusMessage += `<strong>${this.getProviderName(provider)}:</strong> ❌ خطأ في الاتصال<br>`;
+                    }
+                }
+                
+                this.addMessage(statusMessage, 'system');
+            }
+            
+            getProviderName(provider) {
+                const names = {
+                    'openai': 'OpenAI',
+                    'anthropic': 'Anthropic',
+                    'google': 'Google AI',
+                    'huggingface': 'Hugging Face'
+                };
+                return names[provider] || provider;
+            }
+        }
+        
+        // تشغيل الواجهة
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChatInterface();
+        });
+    </script>
+</body>
+</html>
