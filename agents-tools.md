@@ -1,4 +1,3 @@
-
 # 🤖 أدوات ووكلاء MCP - قائمة شاملة
 
 ## 🧠 أطر عمل الذكاء الاصطناعي والوكلاء
@@ -83,9 +82,9 @@
 - [mbailey/voice-mcp](https://github.com/mbailey/voice-mcp) - التفاعل الصوتي
 
 ### التصميم والنمذجة
-- [ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp) - Blender
-- [PatrickPalmer/MayaMCP](https://github.com/PatrickPalmer/MayaMCP) - Maya
-- [diivi/aseprite-mcp](https://github.com/diivi/aseprite-mcp) - Aseprite
+- [ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp) 🐍 - MCP server for working with Blender
+- [comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI) 🐍 🏠 - واجهة رسومية قوية قائمة على العقد لـ Stable Diffusion ونماذج الذكاء الاصطناعي الأخرى، تمكن من تصميم سير عمل معقد لإنتاج ومعالجة وتجريب الصور
+- [diivi/aseprite-mcp](https://github.com/diivi/aseprite-mcp) 🐍 🏠 - MCP server using the Aseprite API to create pixel art
 
 ## 💰 المالية والعملات المشفرة
 
