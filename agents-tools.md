@@ -3,8 +3,8 @@
 ## 🧠 أطر عمل الذكاء الاصطناعي والوكلاء
 
 ### أطر العمل الرئيسية
-- [microsoft/semantic-kernel](https://github.com/microsoft/semantic-kernel)
-- [microsoft/autogen](https://github.com/microsoft/autogen)
+- [microsoft/semantic-kernel](https://github.com/microsoft/semantic-kernel) - إطار عمل متقدم من مايكروسوفت لدمج الذكاء الاصطناعي في التطبيقات مع دعم المكونات الإضافية والذاكرة والتخطيط
+- [microsoft/autogen](https://github.com/microsoft/autogen) - إطار عمل متطور للوكلاء المتعددين القابلين للتخصيص والتحادث، يمكن تشغيل الكود وتنفيذ المهام المعقدة من خلال التعاون بين عدة وكلاء
 - [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - إطار عمل وكيل ذكاء اصطناعي مستقل يمكنه تقسيم الأهداف إلى مهام فرعية وتنفيذها بشكل مستقل
 - [langgenius/dify](https://github.com/langgenius/dify) - منصة تطوير تطبيقات الذكاء الاصطناعي مفتوحة المصدر مع إدارة النماذج وسير العمل وRAG وأدوات الوكلاء
 - [superagent-ai/superagent](https://github.com/superagent-ai/superagent)
