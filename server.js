@@ -2,8 +2,51 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const AIService = require('./ai-service');
 
-const server = http.createServer((req, res) => {
+const aiService = new AIService();
+
+const server = http.createServer(async (req, res) => {
+  // معالجة طلبات API للذكاء الاصطناعي
+  if (req.url.startsWith('/api/ai') && req.method === 'POST') {
+    try {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', async () => {
+        try {
+          const { provider, message, options } = JSON.parse(body);
+          const response = await aiService.sendRequest(provider, message, options);
+          
+          res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
+          });
+          res.end(JSON.stringify({ success: true, response }));
+        } catch (error) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: error.message }));
+        }
+      });
+    });
+    return;
+  }
+
+  // معالجة طلبات CORS
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    res.end();
+    return;
+  }
+
   let filePath = '.' + req.url;
   if (filePath === './') {
     filePath = './index.html';
