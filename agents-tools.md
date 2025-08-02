@@ -110,6 +110,7 @@
 - [safedep/vet](https://github.com/safedep/vet/blob/main/docs/mcp.md) - VET Security
 - [LaurieWired/GhidraMCP](https://github.com/LaurieWired/GhidraMCP) - Ghidra
 - [leebaird/discover](https://github.com/leebaird/discover) - مجموعة شاملة من سكريبتات Bash لاكتشاف الشبكات وجمع المعلومات في اختبارات الاختراق والأمن السيبراني
+- [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) - مجموعة شاملة من الموارد والأدوات والنصائح لمتخصصي الأمن السيبراني ومديري النظم والشبكات
 
 ### المراقبة
 - [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) - Grafana
