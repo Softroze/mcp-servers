@@ -109,6 +109,7 @@
 - [semgrep/mcp](https://github.com/semgrep/mcp) - Semgrep
 - [safedep/vet](https://github.com/safedep/vet/blob/main/docs/mcp.md) - VET Security
 - [LaurieWired/GhidraMCP](https://github.com/LaurieWired/GhidraMCP) - Ghidra
+- [leebaird/discover](https://github.com/leebaird/discover) - مجموعة شاملة من سكريبتات Bash لاكتشاف الشبكات وجمع المعلومات في اختبارات الاختراق والأمن السيبراني
 
 ### المراقبة
 - [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) - Grafana
