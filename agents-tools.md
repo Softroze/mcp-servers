@@ -66,6 +66,9 @@
 - [cloudflare/mcp-server-cloudflare](https://github.com/cloudflare/mcp-server-cloudflare) - Cloudflare
 - [pulumi/mcp-server](https://github.com/pulumi/mcp-server) - Pulumi
 
+### إدارة النظم والخوادم
+- [SuperManito/LinuxMirrors](https://github.com/SuperManito/LinuxMirrors) - أداة شاملة لتغيير مصادر البرمجيات (mirrors) في توزيعات Linux المختلفة لتحسين سرعة التحديثات
+
 ## 💬 التواصل والشبكات الاجتماعية
 
 ### منصات التواصل
