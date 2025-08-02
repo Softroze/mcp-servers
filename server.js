@@ -3,10 +3,97 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const AIService = require('./ai-service');
+const AgentOrchestrator = require('./agent-orchestrator');
 
 const aiService = new AIService();
+const orchestrator = new AgentOrchestrator();
+
+// تسجيل الوكلاء الافتراضية
+orchestrator.registerAgent('analysis-agent', {
+  name: 'وكيل التحليل',
+  capabilities: ['analysis', 'data-processing', 'statistics'],
+  priority: 8,
+  maxConcurrency: 2
+});
+
+orchestrator.registerAgent('generation-agent', {
+  name: 'وكيل التوليد',
+  capabilities: ['generation', 'creativity', 'content-creation'],
+  priority: 7,
+  maxConcurrency: 1
+});
+
+orchestrator.registerAgent('classification-agent', {
+  name: 'وكيل التصنيف',
+  capabilities: ['classification', 'categorization', 'pattern-recognition'],
+  priority: 6,
+  maxConcurrency: 3
+});
+
+orchestrator.registerAgent('processing-agent', {
+  name: 'وكيل المعالجة',
+  capabilities: ['processing', 'transformation', 'data-manipulation'],
+  priority: 9,
+  maxConcurrency: 2
+});
 
 const server = http.createServer(async (req, res) => {
+  // معالجة طلبات API للوكلاء
+  if (req.url.startsWith('/api/agents') && req.method === 'POST') {
+    try {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', async () => {
+        try {
+          const { action, data } = JSON.parse(body);
+          let result;
+          
+          switch(action) {
+            case 'execute-hierarchical':
+              result = await orchestrator.executeHierarchical(data.tasks, data.masterAgent);
+              break;
+            case 'execute-parallel':
+              result = await orchestrator.executeParallel(data.tasks);
+              break;
+            case 'execute-adaptive':
+              result = await orchestrator.executeAdaptive(data.tasks, data.rules);
+              break;
+            case 'execute-intelligent':
+              result = await orchestrator.executeIntelligent(data.workflow);
+              break;
+            case 'get-stats':
+              result = orchestrator.getSystemStats();
+              break;
+            case 'register-agent':
+              orchestrator.registerAgent(data.id, data.config);
+              result = { success: true, message: 'تم تسجيل الوكيل بنجاح' };
+              break;
+            default:
+              throw new Error(`Action غير مدعوم: ${action}`);
+          }
+          
+          res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
+          });
+          res.end(JSON.stringify({ success: true, data: result }));
+        } catch (error) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: error.message }));
+        }
+      });
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: error.message }));
+    }
+    return;
+  }
+
   // معالجة طلبات API للذكاء الاصطناعي
   if (req.url.startsWith('/api/ai') && req.method === 'POST') {
     try {
@@ -32,7 +119,10 @@ const server = http.createServer(async (req, res) => {
           res.end(JSON.stringify({ success: false, error: error.message }));
         }
       });
-    });
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: error.message }));
+    }
     return;
   }
 
