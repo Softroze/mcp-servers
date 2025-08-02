@@ -711,8 +711,40 @@ const server = http.createServer(async (req, res) => {
 
 const port = process.env.PORT || 5000;
 server.listen(port, '0.0.0.0', async () => {
-  console.log(`Server running at http://0.0.0.0:${port}/`);
+  console.log(`🚀 الخادم يعمل الآن على: http://0.0.0.0:${port}/`);
+  console.log(`📊 لوحة التحكم الموحدة: http://0.0.0.0:${port}/unified-dashboard.html`);
+  console.log(`🤖 واجهة إدارة الوكلاء: http://0.0.0.0:${port}/agent-management.html`);
   
-  // تهيئة Semantic Kernel
-  await semanticKernel.initialize();
+  try {
+    // تهيئة Semantic Kernel
+    await semanticKernel.initialize();
+    console.log(`✅ تم تهيئة Semantic Kernel بنجاح`);
+  } catch (error) {
+    console.log(`⚠️ تحذير: فشل في تهيئة Semantic Kernel: ${error.message}`);
+  }
+  
+  console.log(`✨ النظام الموحد للوكلاء الذكيين جاهز للاستخدام!`);
+});
+
+// معالجة أخطاء الخادم
+server.on('error', (error) => {
+  console.error(`❌ خطأ في الخادم: ${error.message}`);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`المنفذ ${port} مُستخدم بالفعل. جرب منفذ آخر.`);
+  }
+});
+
+// معالجة إيقاف التطبيق بشكل صحيح
+process.on('SIGTERM', () => {
+  console.log('🛑 إيقاف الخادم...');
+  server.close(() => {
+    console.log('✅ تم إيقاف الخادر بنجاح');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 إيقاف الخادم...');
+  server.close(() => {
+    console.log('✅ تم إيقاف الخادر بنجاح');
+  });
 });
