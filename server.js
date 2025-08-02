@@ -80,6 +80,15 @@ const server = http.createServer(async (req, res) => {
             case 'semantic-skills':
               result = semanticKernel.getAvailableSkills();
               break;
+            case 'create-agent-group':
+              result = orchestrator.createAgentGroup(data.groupId, data.agentIds, data.collaborationType);
+              break;
+            case 'execute-collaborative':
+              result = await orchestrator.executeCollaborativeTask(data.taskConfig);
+              break;
+            case 'get-collaboration-stats':
+              result = orchestrator.getCollaborationStats();
+              break;
             default:
               throw new Error(`Action غير مدعوم: ${action}`);
           }

@@ -1,0 +1,584 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التعاون بين الوكلاء</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4ECDC4;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4ECDC4;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .agent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .agent-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .agent-card:hover {
+            border-color: #4ECDC4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .agent-card.selected {
+            border-color: #FF6B6B;
+            background: #fff5f5;
+        }
+
+        .agent-card .agent-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .agent-card .agent-capabilities {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .collaboration-network {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .network-visualization {
+            height: 300px;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 5px solid #4ECDC4;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .results-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4ECDC4;
+        }
+
+        .result-success {
+            border-left-color: #28a745;
+        }
+
+        .result-error {
+            border-left-color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .agent-list {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤝 إدارة التعاون بين الوكلاء</h1>
+            <p>نظام متقدم لتنسيق وإدارة التعاون بين الوكلاء الذكية</p>
+        </div>
+
+        <div class="content">
+            <!-- إنشاء مجموعة تعاونية -->
+            <div class="section">
+                <h2>🏗️ إنشاء مجموعة تعاونية</h2>
+                <div class="form-group">
+                    <label for="groupId">معرف المجموعة:</label>
+                    <input type="text" id="groupId" placeholder="مثال: analysis-team-01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="collaborationType">نوع التعاون:</label>
+                    <select id="collaborationType">
+                        <option value="cooperative">تعاوني</option>
+                        <option value="hierarchical">هرمي</option>
+                        <option value="competitive">تنافسي</option>
+                    </select>
+                </div>
+
+                <h3>اختر الوكلاء للمجموعة:</h3>
+                <div class="agent-list" id="agentSelection">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+
+                <button class="btn" onclick="createAgentGroup()">إنشاء المجموعة</button>
+            </div>
+
+            <!-- تنفيذ مهمة تعاونية -->
+            <div class="section">
+                <h2>⚡ تنفيذ مهمة تعاونية</h2>
+                <div class="form-group">
+                    <label for="taskGroupId">معرف المجموعة:</label>
+                    <input type="text" id="taskGroupId" placeholder="معرف المجموعة المراد استخدامها">
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">وصف المهمة:</label>
+                    <textarea id="taskDescription" rows="4" placeholder="اكتب وصف المهمة التي تريد تنفيذها تعاونياً..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskType">نوع المهمة:</label>
+                    <select id="taskType">
+                        <option value="analysis">تحليل</option>
+                        <option value="generation">توليد</option>
+                        <option value="processing">معالجة</option>
+                        <option value="classification">تصنيف</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="collaborationStrategy">استراتيجية التعاون:</label>
+                    <select id="collaborationStrategy">
+                        <option value="divide-and-conquer">فرق تسد</option>
+                        <option value="pipeline">خط الأنابيب</option>
+                        <option value="redundant">مكرر</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="synchronization">التزامن:</label>
+                    <select id="synchronization">
+                        <option value="async">غير متزامن</option>
+                        <option value="sync">متزامن</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="executeCollaborativeTask()">تنفيذ المهمة</button>
+            </div>
+
+            <!-- شبكة التعاون -->
+            <div class="section">
+                <h2>🌐 شبكة التعاون</h2>
+                <div class="collaboration-network">
+                    <div class="network-visualization" id="networkVisualization">
+                        سيتم عرض شبكة التعاون هنا
+                    </div>
+                </div>
+                <button class="btn" onclick="loadCollaborationStats()">تحديث الإحصائيات</button>
+            </div>
+
+            <!-- إحصائيات التعاون -->
+            <div class="section">
+                <h2>📊 إحصائيات التعاون</h2>
+                <div class="stats-grid" id="collaborationStats">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- منطقة النتائج -->
+            <div class="section">
+                <h2>📋 النتائج والسجلات</h2>
+                <div class="results-area" id="resultsArea">
+                    <p>سيتم عرض نتائج التعاون هنا...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAgents = [];
+        let availableAgents = [];
+
+        // تحميل الوكلاء المتاحة عند بدء الصفحة
+        window.onload = function() {
+            loadAvailableAgents();
+            loadCollaborationStats();
+        };
+
+        // تحميل الوكلاء المتاحة
+        async function loadAvailableAgents() {
+            try {
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get-stats' })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    // محاكاة قائمة الوكلاء (في التطبيق الحقيقي، يجب الحصول على قائمة الوكلاء)
+                    availableAgents = [
+                        { id: 'data-analyst', name: 'محلل البيانات', capabilities: ['analysis', 'statistics'] },
+                        { id: 'text-analyst', name: 'محلل النصوص', capabilities: ['text-analysis', 'sentiment'] },
+                        { id: 'content-generator', name: 'مولد المحتوى', capabilities: ['generation', 'creativity'] },
+                        { id: 'code-generator', name: 'مولد الكود', capabilities: ['code-generation', 'programming'] },
+                        { id: 'image-processor', name: 'معالج الصور', capabilities: ['image-processing', 'vision'] },
+                        { id: 'data-processor', name: 'معالج البيانات', capabilities: ['data-processing', 'ETL'] },
+                        { id: 'document-classifier', name: 'مصنف المستندات', capabilities: ['classification', 'categorization'] },
+                        { id: 'spam-detector', name: 'كاشف البريد المزعج', capabilities: ['spam-detection', 'filtering'] }
+                    ];
+                    
+                    displayAgents();
+                }
+            } catch (error) {
+                addResult('خطأ في تحميل الوكلاء: ' + error.message, 'error');
+            }
+        }
+
+        // عرض الوكلاء المتاحة
+        function displayAgents() {
+            const agentSelection = document.getElementById('agentSelection');
+            agentSelection.innerHTML = '';
+
+            availableAgents.forEach(agent => {
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                agentCard.onclick = () => toggleAgentSelection(agent.id, agentCard);
+                
+                agentCard.innerHTML = `
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-capabilities">${agent.capabilities.join(', ')}</div>
+                `;
+                
+                agentSelection.appendChild(agentCard);
+            });
+        }
+
+        // تبديل اختيار الوكيل
+        function toggleAgentSelection(agentId, cardElement) {
+            if (selectedAgents.includes(agentId)) {
+                selectedAgents = selectedAgents.filter(id => id !== agentId);
+                cardElement.classList.remove('selected');
+            } else {
+                selectedAgents.push(agentId);
+                cardElement.classList.add('selected');
+            }
+        }
+
+        // إنشاء مجموعة وكلاء
+        async function createAgentGroup() {
+            const groupId = document.getElementById('groupId').value;
+            const collaborationType = document.getElementById('collaborationType').value;
+
+            if (!groupId || selectedAgents.length === 0) {
+                addResult('يرجى إدخال معرف المجموعة واختيار وكيل واحد على الأقل', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create-agent-group',
+                        data: {
+                            groupId: groupId,
+                            agentIds: selectedAgents,
+                            collaborationType: collaborationType
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    addResult(`تم إنشاء المجموعة "${groupId}" بنجاح مع ${selectedAgents.length} وكلاء`, 'success');
+                    
+                    // إعادة تعيين النموذج
+                    document.getElementById('groupId').value = '';
+                    selectedAgents = [];
+                    document.querySelectorAll('.agent-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                } else {
+                    addResult('خطأ في إنشاء المجموعة: ' + result.error, 'error');
+                }
+            } catch (error) {
+                addResult('خطأ في الاتصال: ' + error.message, 'error');
+            }
+        }
+
+        // تنفيذ مهمة تعاونية
+        async function executeCollaborativeTask() {
+            const taskGroupId = document.getElementById('taskGroupId').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+            const taskType = document.getElementById('taskType').value;
+            const collaborationStrategy = document.getElementById('collaborationStrategy').value;
+            const synchronization = document.getElementById('synchronization').value;
+
+            if (!taskGroupId || !taskDescription) {
+                addResult('يرجى إدخال معرف المجموعة ووصف المهمة', 'error');
+                return;
+            }
+
+            try {
+                addResult('بدء تنفيذ المهمة التعاونية...', 'info');
+
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'execute-collaborative',
+                        data: {
+                            taskConfig: {
+                                task: {
+                                    type: taskType,
+                                    description: taskDescription
+                                },
+                                groupId: taskGroupId,
+                                collaborationStrategy: collaborationStrategy,
+                                synchronization: synchronization
+                            }
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const data = result.data;
+                    addResult(`تم تنفيذ المهمة بنجاح! النتائج: ${data.result.summary}`, 'success');
+                    
+                    // عرض تفاصيل التعاون
+                    if (data.collaborationMetrics) {
+                        addResult(`مقاييس التعاون - الكفاءة: ${(data.collaborationMetrics.groupEfficiency * 100).toFixed(1)}%، نقاط التعاون: ${(data.collaborationMetrics.collaborationScore * 100).toFixed(1)}`, 'info');
+                    }
+                } else {
+                    addResult('خطأ في تنفيذ المهمة: ' + result.error, 'error');
+                }
+            } catch (error) {
+                addResult('خطأ في الاتصال: ' + error.message, 'error');
+            }
+        }
+
+        // تحميل إحصائيات التعاون
+        async function loadCollaborationStats() {
+            try {
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get-collaboration-stats' })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    displayCollaborationStats(result.data);
+                }
+            } catch (error) {
+                addResult('خطأ في تحميل الإحصائيات: ' + error.message, 'error');
+            }
+        }
+
+        // عرض إحصائيات التعاون
+        function displayCollaborationStats(stats) {
+            const statsContainer = document.getElementById('collaborationStats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalGroups || 0}</div>
+                    <div class="stat-label">إجمالي المجموعات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalConnections || 0}</div>
+                    <div class="stat-label">إجمالي الاتصالات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${(stats.averageGroupSize || 0).toFixed(1)}</div>
+                    <div class="stat-label">متوسط حجم المجموعة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${((stats.averageConnectionStrength || 0) * 100).toFixed(0)}%</div>
+                    <div class="stat-label">قوة الاتصال</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${((stats.averageTrustLevel || 0) * 100).toFixed(0)}%</div>
+                    <div class="stat-label">مستوى الثقة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.activeGroups || 0}</div>
+                    <div class="stat-label">المجموعات النشطة</div>
+                </div>
+            `;
+
+            // تحديث تصور الشبكة
+            const networkViz = document.getElementById('networkVisualization');
+            if (stats.totalGroups > 0) {
+                networkViz.innerHTML = `
+                    <div style="text-align: center;">
+                        <h3>🌐 شبكة التعاون النشطة</h3>
+                        <p>${stats.totalGroups} مجموعات متصلة</p>
+                        <p>${stats.totalConnections} اتصال نشط</p>
+                        <p>قوة الشبكة: ${((stats.averageConnectionStrength || 0) * 100).toFixed(0)}%</p>
+                    </div>
+                `;
+            }
+        }
+
+        // إضافة نتيجة لمنطقة النتائج
+        function addResult(message, type = 'info') {
+            const resultsArea = document.getElementById('resultsArea');
+            const resultItem = document.createElement('div');
+            resultItem.className = `result-item result-${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            resultItem.innerHTML = `
+                <strong>[${timestamp}]</strong> ${message}
+            `;
+            
+            resultsArea.insertBefore(resultItem, resultsArea.firstChild);
+            
+            // الحفاظ على آخر 50 نتيجة فقط
+            while (resultsArea.children.length > 50) {
+                resultsArea.removeChild(resultsArea.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
