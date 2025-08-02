@@ -6,6 +6,7 @@
 - [microsoft/semantic-kernel](https://github.com/microsoft/semantic-kernel)
 - [microsoft/autogen](https://github.com/microsoft/autogen)
 - [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - إطار عمل وكيل ذكاء اصطناعي مستقل يمكنه تقسيم الأهداف إلى مهام فرعية وتنفيذها بشكل مستقل
+- [langgenius/dify](https://github.com/langgenius/dify) - منصة تطوير تطبيقات الذكاء الاصطناعي مفتوحة المصدر مع إدارة النماذج وسير العمل وRAG وأدوات الوكلاء
 - [superagent-ai/superagent](https://github.com/superagent-ai/superagent)
 - [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI)
 - [open-webui/open-webui](https://github.com/open-webui/open-webui) - واجهة ويب شاملة وسهلة الاستخدام للنماذج اللغوية الكبيرة
