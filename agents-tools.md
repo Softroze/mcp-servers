@@ -115,6 +115,46 @@
 - [Hack-with-Github/Awesome-Hacking](https://github.com/Hack-with-Github/Awesome-Hacking) - مجموعة مذهلة من الأدوات والموارد والمراجع للقرصنة الأخلاقية واختبار الاختراق والأمن السيبراني
 - [Z4nzu/hackingtool](https://github.com/Z4nzu/hackingtool) - مجموعة شاملة من أدوات القرصنة الأخلاقية والاختبار الأمني في حزمة واحدة، تضم أكثر من 100 أداة مختلفة لاختبار الشبكات والمواقع والأنظمة
 
+### أدوات اختبار الشبكات اللاسلكية (WiFi)
+- [aircrack-ng/aircrack-ng](https://github.com/aircrack-ng/aircrack-ng) - مجموعة شاملة من أدوات تقييم أمان الشبكات اللاسلكية 802.11 تشمل مراقبة وهجمات واختبارات وكسر التشفير
+- [wifiphisher/wifiphisher](https://github.com/wifiphisher/wifiphisher) - أداة طورة لإجراء هجمات الهندسة الاجتماعية ضد الشبكات اللاسلكية Wi-Fi
+- [FluxionNetwork/fluxion](https://github.com/FluxionNetwork/fluxion) - أداة أمان WIFI تحاكي أسلوب LinSet وقوائم الضبط الاحترافية للحصول على كلمات مرور WPA/WPA2
+- [derv82/wifite2](https://github.com/derv82/wifite2) - أداة أتمتة لهجمات الشبكات اللاسلكية WEP/WPA بواجهة سهلة الاستخدام
+- [besimaltnok/PiFinger](https://github.com/besimaltnok/PiFinger) - فحص شبكات WiFi وجمع معلومات الأجهزة المتصلة بها
+- [P0cL4bs/wifipumpkin3](https://github.com/P0cL4bs/wifipumpkin3) - إطار عمل قوي لإنشاء نقاط وصول مارقة لاختبار الأمان
+
+### أدوات اختبار البلوتوث
+- [greatscottgadgets/ubertooth](https://github.com/greatscottgadgets/ubertooth) - مشروع مفتوح المصدر لمراقبة Bluetooth
+- [hak5/wifi-pineapple](https://github.com/hak5/wifi-pineapple) - منصة اختبار اختراق للشبكات اللاسلكية والبلوتوث
+- [conorpp/btlejack](https://github.com/conorpp/btlejack) - أداة قرصنة Bluetooth Low Energy (BLE)
+- [evilsocket/bleah](https://github.com/evilsocket/bleah) - ماسح ضوئي وتعداد أجهزة BLE
+
+### أدوات اختبار الشبكات وIP
+- [nmap/nmap](https://github.com/nmap/nmap) - أداة فحص الشبكات واكتشاف الخدمات وتدقيق الأمان
+- [robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) - ماسح منافذ TCP فائق السرعة
+- [bettercap/bettercap](https://github.com/bettercap/bettercap) - إطار عمل شامل وقابل للتوسيع للتعرف والمراقبة والتحكم في شبكات WiFi وBLE والإيثرنت
+- [zmap/zmap](https://github.com/zmap/zmap) - ماسح ضوئي سريع للشبكات على نطاق الإنترنت
+- [vulnersCom/nmap-vulners](https://github.com/vulnersCom/nmap-vulners) - سكريبت NSE للكشف عن الثغرات الأمنية
+
+### أدوات اختبار الأجهزة المحمولة
+- [MobSF/Mobile-Security-Framework-MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) - إطار عمل شامل لاختبار أمان التطبيقات المحمولة (Android/iOS)
+- [frida/frida](https://github.com/frida/frida) - أداة حقن الكود الديناميكي لفحص وتعديل التطبيقات أثناء التشغيل
+- [sensepost/objection](https://github.com/sensepost/objection) - أداة استكشاف وقاء تطبيقات الأجهزة المحمولة باستخدام Frida
+- [ac-pm/Inspeckage](https://github.com/ac-pm/Inspeckage) - أداة تحليل التطبيقات الديناميكية لـ Android
+- [iSECPartners/Android-SSL-TrustKiller](https://github.com/iSECPartners/Android-SSL-TrustKiller) - تجاوز فحص شهادات SSL في تطبيقات Android
+
+### أدوات الطب الشرعي الرقمي
+- [sleuthkit/sleuthkit](https://github.com/sleuthkit/sleuthkit) - مجموعة أدوات مفتوحة المصدر للطب الشرعي الرقمي
+- [volatilityfoundation/volatility](https://github.com/volatilityfoundation/volatility) - إطار عمل متقدم لتحليل الذاكرة الطب الشرعي الرقمي
+- [gchq/CyberChef](https://github.com/gchq/CyberChef) - تطبيق ويب للتشفير والتحليل الرقمي وتحويل البيانات
+
+### أدوات الشبكات الداخلية
+- [lgandx/Responder](https://github.com/lgandx/Responder) - أداة لسرقة اعتماد الشبكة في بيئات Active Directory
+- [SpiderLabs/Responder](https://github.com/SpiderLabs/Responder) - خادم LLMNR وNBT-NS وMDNS مارق
+- [byt3bl33d3r/CrackMapExec](https://github.com/byt3bl33d3r) - أداة اختبار اختراق شبكات Windows/Active Directory
+- [PowerShellMafia/PowerSploit](https://github.com/PowerShellMafia/PowerSploit) - مجموعة وحدات PowerShell لاختبار الاختراق
+- [BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound) - أداة تحليل مسارات الهجوم في بيئات Active Directory
+
 ### المراقبة
 - [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) - Grafana
 - [modelcontextprotocol/server-sentry](https://github.com/modelcontextprotocol/servers/tree/main/src/sentry) - Sentry
