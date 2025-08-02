@@ -8,7 +8,8 @@
 - [Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) - إطار عمل وكيل ذكاء اصطناعي مستقل يمكنه تقسيم الأهداف إلى مهام فرعية وتنفيذها بشكل مستقل
 - [langgenius/dify](https://github.com/langgenius/dify) - منصة تطوير تطبيقات الذكاء الاصطناعي مفتوحة المصدر مع إدارة النماذج وسير العمل وRAG وأدوات الوكلاء
 - [superagent-ai/superagent](https://github.com/superagent-ai/superagent)
-- [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI)
+- [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) - إطار عمل للوكلاء المتعاونين الذي يتيح إنشاء فرق من الوكلاء الذكية التي تعمل معاً لحل المهام المعقدة
+- [Softroze/crewAI](https://github.com/Softroze/crewAI) - تطوير محسن لـ CrewAI مع ميزات إضافية وتحسينات في الأداء
 - [open-webui/open-webui](https://github.com/open-webui/open-webui) - واجهة ويب شاملة وسهلة الاستخدام للنماذج اللغوية الكبيرة
 
 ## 🤖 الوكلاء البرمجية (Coding Agents)
