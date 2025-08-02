@@ -8,6 +8,7 @@
 - [microsoft/autogen](https://github.com/microsoft/autogen)
 - [superagent-ai/superagent](https://github.com/superagent-ai/superagent)
 - [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI)
+- [open-webui/open-webui](https://github.com/open-webui/open-webui) - واجهة ويب شاملة وسهلة الاستخدام للنماذج اللغوية الكبيرة
 
 ## 🤖 الوكلاء البرمجية (Coding Agents)
 
