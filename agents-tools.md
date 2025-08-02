@@ -23,6 +23,7 @@
 - [jetbrains/mcpProxy](https://github.com/JetBrains/mcpProxy) - الاتصال بـ JetBrains IDE
 - [neovim/neovim](https://github.com/neovim/neovim) - محرر نصوص متقدم مع دعم واسع للإضافات وواجهة برمجية حديثة
 - [fastapi/fastapi](https://github.com/fastapi/fastapi) - إطار عمل ويب حديث وسريع لبناء APIs باستخدام Python مع توثيق تفاعلي تلقائي
+- [TheR1D/shell_gpt](https://github.com/TheR1D/shell_gpt) - أداة سطر أوامر تستخدم الذكاء الاصطناعي لتوليد وتنفيذ أوامر shell باستخدام اللغة الطبيعية
 - [microsoft/markitdown](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp) - تحويل الملفات إلى Markdown
 
 ## 🗄️ قواعد البيانات والتخزين
