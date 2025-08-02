@@ -1,4 +1,3 @@
-
 class AgentOrchestrator {
   constructor() {
     this.agents = new Map();
@@ -22,7 +21,7 @@ class AgentOrchestrator {
       avgResponseTime: 0,
       ...config
     });
-    
+
     this.performanceMetrics.set(agentId, {
       totalTasks: 0,
       successfulTasks: 0,
@@ -37,7 +36,7 @@ class AgentOrchestrator {
     if (!masterAgent) throw new Error(`Master agent ${masterAgentId} not found`);
 
     const results = [];
-    
+
     for (const task of taskChain) {
       const bestAgent = this.selectBestAgentForTask(task);
       const result = await this.executeTask(bestAgent.id, task);
@@ -48,7 +47,7 @@ class AgentOrchestrator {
         timestamp: new Date()
       });
     }
-    
+
     return {
       type: 'hierarchical',
       masterAgent: masterAgentId,
@@ -77,7 +76,7 @@ class AgentOrchestrator {
     });
 
     const results = await Promise.all(taskPromises);
-    
+
     return {
       type: 'parallel',
       results: results,
@@ -89,7 +88,7 @@ class AgentOrchestrator {
   async executeAdaptive(tasks, adaptationRules = {}) {
     const metrics = this.analyzeSystemLoad();
     let strategy = 'sequential';
-    
+
     // قواعد التكيف
     if (metrics.systemLoad < 0.3 && tasks.length > 1) {
       strategy = 'parallel';
@@ -123,18 +122,18 @@ class AgentOrchestrator {
 
     // تحليل المتطلبات
     const analysis = await this.analyzeWorkflow(tasks, requirements);
-    
+
     // اختيار الاستراتيجية الأمثل
     const strategy = this.selectOptimalStrategy(analysis, constraints, optimization);
-    
+
     // تنفيذ الاستراتيجية مع المراقبة
     const execution = await this.executeWithMonitoring(tasks, strategy);
-    
+
     // تحسين ديناميكي أثناء التنفيذ
     if (execution.needsOptimization) {
       return await this.optimizeExecution(execution);
     }
-    
+
     return execution;
   }
 
@@ -166,7 +165,7 @@ class AgentOrchestrator {
     const capabilityMatch = this.calculateCapabilityMatch(agent, task);
     const performanceScore = metrics.successfulTasks / Math.max(metrics.totalTasks, 1);
     const speedScore = 1 / Math.max(metrics.averageTime, 1);
-    
+
     return (capabilityMatch * 0.4) + (performanceScore * 0.3) + (speedScore * 0.2) + (agent.priority * 0.1);
   }
 
@@ -174,17 +173,17 @@ class AgentOrchestrator {
   async executeTask(agentId, task) {
     const agent = this.agents.get(agentId);
     const startTime = Date.now();
-    
+
     try {
       agent.status = 'busy';
       agent.currentTasks++;
-      
+
       // محاكاة تنفيذ المهمة (يمكن استبدالها بالتنفيذ الفعلي)
       const result = await this.simulateTaskExecution(agent, task);
-      
+
       const executionTime = Date.now() - startTime;
       this.updatePerformanceMetrics(agentId, true, executionTime);
-      
+
       agent.lastUsed = new Date();
       return {
         success: true,
@@ -192,11 +191,11 @@ class AgentOrchestrator {
         executionTime: executionTime,
         agentId: agentId
       };
-      
+
     } catch (error) {
       const executionTime = Date.now() - startTime;
       this.updatePerformanceMetrics(agentId, false, executionTime, error);
-      
+
       return {
         success: false,
         error: error.message,
@@ -214,7 +213,7 @@ class AgentOrchestrator {
     // محاكاة وقت المعالجة
     const processingTime = Math.random() * 2000 + 500;
     await new Promise(resolve => setTimeout(resolve, processingTime));
-    
+
     // محاكاة نتيجة المعالجة
     return {
       taskType: task.type,
@@ -227,7 +226,7 @@ class AgentOrchestrator {
   // تحديث مقاييس الأداء
   updatePerformanceMetrics(agentId, success, executionTime, error = null) {
     const metrics = this.performanceMetrics.get(agentId);
-    
+
     metrics.totalTasks++;
     if (success) {
       metrics.successfulTasks++;
@@ -237,10 +236,10 @@ class AgentOrchestrator {
         error: error.message || error
       });
     }
-    
+
     // حساب متوسط وقت التنفيذ
     metrics.averageTime = (metrics.averageTime * (metrics.totalTasks - 1) + executionTime) / metrics.totalTasks;
-    
+
     // تحديث معدل النجاح للوكيل
     const agent = this.agents.get(agentId);
     agent.successRate = metrics.successfulTasks / metrics.totalTasks;
@@ -252,7 +251,7 @@ class AgentOrchestrator {
     const totalAgents = this.agents.size;
     const busyAgents = Array.from(this.agents.values()).filter(a => a.status === 'busy').length;
     const availableAgents = totalAgents - busyAgents;
-    
+
     return {
       systemLoad: busyAgents / totalAgents,
       availableAgents: availableAgents,
@@ -266,7 +265,7 @@ class AgentOrchestrator {
     if (!task.requiredCapabilities || task.requiredCapabilities.length === 0) {
       return true;
     }
-    
+
     return task.requiredCapabilities.every(capability => 
       agent.capabilities.includes(capability)
     );
@@ -277,11 +276,11 @@ class AgentOrchestrator {
     if (!task.requiredCapabilities || task.requiredCapabilities.length === 0) {
       return 1.0;
     }
-    
+
     const matchedCapabilities = task.requiredCapabilities.filter(capability =>
       agent.capabilities.includes(capability)
     );
-    
+
     return matchedCapabilities.length / task.requiredCapabilities.length;
   }
 
@@ -311,7 +310,7 @@ class AgentOrchestrator {
   async executeWithMonitoring(tasks, strategy) {
     const startTime = Date.now();
     let results;
-    
+
     switch (strategy) {
       case 'parallel':
         results = await this.executeParallel(tasks);
@@ -322,17 +321,17 @@ class AgentOrchestrator {
       default:
         results = await this.executeAdaptive(tasks);
     }
-    
+
     results.totalExecutionTime = Date.now() - startTime;
     results.needsOptimization = this.shouldOptimize(results);
-    
+
     return results;
   }
 
   // التنفيذ المتسلسل
   async executeSequential(tasks) {
     const results = [];
-    
+
     for (const task of tasks) {
       const bestAgent = this.selectBestAgentForTask(task);
       const result = await this.executeTask(bestAgent.id, task);
@@ -343,7 +342,7 @@ class AgentOrchestrator {
         timestamp: new Date()
       });
     }
-    
+
     return {
       type: 'sequential',
       results: results,
@@ -355,7 +354,7 @@ class AgentOrchestrator {
   getSystemStats() {
     const agents = Array.from(this.agents.values());
     const metrics = Array.from(this.performanceMetrics.values());
-    
+
     return {
       totalAgents: agents.length,
       activeAgents: agents.filter(a => a.status === 'busy').length,

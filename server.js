@@ -71,6 +71,15 @@ const server = http.createServer(async (req, res) => {
               orchestrator.registerAgent(data.id, data.config);
               result = { success: true, message: 'تم تسجيل الوكيل بنجاح' };
               break;
+            case 'semantic-execute':
+              result = await semanticKernel.executeSemanticTask(data.agentId, data.task);
+              break;
+            case 'semantic-agents':
+              result = semanticKernel.getAllSemanticAgents();
+              break;
+            case 'semantic-skills':
+              result = semanticKernel.getAvailableSkills();
+              break;
             default:
               throw new Error(`Action غير مدعوم: ${action}`);
           }
@@ -183,6 +192,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, '0.0.0.0', async () => {
   console.log(`Server running at http://0.0.0.0:${port}/`);
+  
+  // تهيئة Semantic Kernel
+  await semanticKernel.initialize();
 });
