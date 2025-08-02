@@ -45,6 +45,7 @@
 
 ### أدوات الويب
 - [modelcontextprotocol/server-puppeteer](https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer) - Puppeteer
+- [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) - مكتبة Node.js قوية للتحكم في Chrome/Chromium للأتمتة والاختبار
 - [browserbase/mcp-server-browserbase](https://github.com/browserbase/mcp-server-browserbase) - Browserbase
 - [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) - Playwright
 
