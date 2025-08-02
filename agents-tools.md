@@ -113,6 +113,7 @@
 - [leebaird/discover](https://github.com/leebaird/discover) - مجموعة شاملة من سكريبتات Bash لاكتشاف الشبكات وجمع المعلومات في اختبارات الاختراق والأمن السيبراني
 - [trimstray/the-book-of-secret-knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) - مجموعة شاملة من الموارد والأدوات والنصائح لمتخصصي الأمن السيبراني ومديري النظم والشبكات
 - [Hack-with-Github/Awesome-Hacking](https://github.com/Hack-with-Github/Awesome-Hacking) - مجموعة مذهلة من الأدوات والموارد والمراجع للقرصنة الأخلاقية واختبار الاختراق والأمن السيبراني
+- [Z4nzu/hackingtool](https://github.com/Z4nzu/hackingtool) - مجموعة شاملة من أدوات القرصنة الأخلاقية والاختبار الأمني في حزمة واحدة، تضم أكثر من 100 أداة مختلفة لاختبار الشبكات والمواقع والأنظمة
 
 ### المراقبة
 - [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) - Grafana
