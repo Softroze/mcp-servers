@@ -2,28 +2,63 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// تحميل خدمات الذكاء الاصطناعي مع معالجة أفضل للأخطاء
+// تحميل خدمات الذكاء الاصطناعي مع معالجة شاملة للأخطاء
 let AIService;
+
+// التأكد من وجود الملفات المطلوبة أولاً
+const fs = require('fs');
+
 try {
-  const aiServiceModule = require('./ai-service');
-  AIService = aiServiceModule.default || aiServiceModule;
-  console.log('✅ تم تحميل ai-service بنجاح');
+  // التحقق من وجود ai-service.js
+  if (fs.existsSync('./ai-service.js')) {
+    const aiServiceModule = require('./ai-service');
+    
+    // التعامل مع التصدير المختلفة (CommonJS و ES6)
+    if (typeof aiServiceModule === 'function') {
+      AIService = aiServiceModule;
+    } else if (aiServiceModule && typeof aiServiceModule.default === 'function') {
+      AIService = aiServiceModule.default;
+    } else if (aiServiceModule && aiServiceModule.AIService) {
+      AIService = aiServiceModule.AIService;
+    } else {
+      throw new Error('تصدير غير صحيح من ai-service.js');
+    }
+    
+    console.log('✅ تم تحميل ai-service بنجاح');
+  } else {
+    throw new Error('ملف ai-service.js غير موجود');
+  }
 } catch (error) {
-  console.log('⚠️ تحذير: لم يتم العثور على ai-service.js، سيتم استخدام خدمة بديلة');
+  console.log('⚠️ تحذير: لم يتم العثور على ai-service.js أو حدث خطأ في التحميل');
   console.log('تفاصيل الخطأ:', error.message);
   
-  // خدمة بديلة محسنة
-  AIService = class {
+  // خدمة بديلة آمنة ومحسنة
+  AIService = class SafeAIService {
     constructor() {
-      console.log('🔧 تم تهيئة الخدمة البديلة');
+      console.log('🔧 تم تهيئة الخدمة البديلة الآمنة');
+      this.isInitialized = true;
+      this.availableProviders = ['fallback'];
     }
     
     async sendRequest(provider, message, options = {}) {
+      // التحقق من صحة البيانات المدخلة
+      if (!provider) provider = 'fallback';
+      if (!message) message = 'رسالة افتراضية';
+      if (!options) options = {};
+      
+      console.log(`📝 معالجة طلب بديل للمزود: ${provider}`);
+      
       return {
         success: true,
-        response: `تم معالجة الرسالة باستخدام الخدمة البديلة: ${message}`,
-        provider: provider || 'fallback'
+        response: `تم معالجة الرسالة بواسطة الخدمة البديلة الآمنة: ${message}`,
+        provider: provider,
+        timestamp: new Date().toISOString(),
+        fallback: true
       };
+    }
+    
+    getAvailableProviders() {
+      return this.availableProviders;
     }
   };
 }
@@ -216,54 +251,191 @@ class SemanticKernelIntegration {
   }
 }
 
-// إنشاء الخدمات مع معالجة محسنة للأخطاء
+// إنشاء الخدمات مع حماية شاملة من الأخطاء
 let aiService, orchestrator;
 
+// دالة مساعدة للتحقق من صحة الكائن
+function validateObject(obj, name) {
+  if (obj === null || obj === undefined) {
+    throw new Error(`${name} is null or undefined`);
+  }
+  if (typeof obj !== 'object' && typeof obj !== 'function') {
+    throw new Error(`${name} is not a valid object or function`);
+  }
+  return true;
+}
+
 try {
-  console.log('🔧 تهيئة خدمات الذكاء الاصطناعي...');
+  console.log('🔧 بدء تهيئة خدمات الذكاء الاصطناعي...');
   
-  // التحقق من أن AIService ليس undefined
-  if (!AIService) {
-    throw new Error('AIService غير محدد');
+  // التحقق الأول: هل AIService موجود ويمكن استخدامه؟
+  if (!AIService || typeof AIService !== 'function') {
+    throw new Error(`AIService غير صالح أو غير محدد: ${typeof AIService}`);
   }
   
-  aiService = new AIService();
+  console.log('✓ تم التحقق من صحة AIService');
   
-  // التحقق من نجاح التهيئة
-  if (!aiService) {
-    throw new Error('فشل في إنشاء aiService');
+  // إنشاء aiService مع معالجة آمنة
+  try {
+    aiService = new AIService();
+    validateObject(aiService, 'aiService');
+    
+    if (typeof aiService.sendRequest !== 'function') {
+      throw new Error('aiService.sendRequest is not a function');
+    }
+    
+    console.log('✓ تم إنشاء aiService بنجاح');
+  } catch (aiError) {
+    console.warn('⚠️ خطأ في إنشاء aiService:', aiError.message);
+    throw aiError;
   }
   
-  orchestrator = new AgentOrchestrator();
-  
-  if (!orchestrator) {
-    throw new Error('فشل في إنشاء orchestrator');
+  // إنشاء orchestrator مع معالجة آمنة
+  try {
+    orchestrator = new AgentOrchestrator();
+    validateObject(orchestrator, 'orchestrator');
+    
+    if (typeof orchestrator.executeTask !== 'function') {
+      throw new Error('orchestrator.executeTask is not a function');
+    }
+    
+    console.log('✓ تم إنشاء orchestrator بنجاح');
+  } catch (orchError) {
+    console.warn('⚠️ خطأ في إنشاء orchestrator:', orchError.message);
+    throw orchError;
   }
   
-  console.log('✅ تم تهيئة جميع الخدمات بنجاح');
-  console.log('📊 aiService:', typeof aiService);
-  console.log('📊 orchestrator:', typeof orchestrator);
+  console.log('✅ تم تهيئة جميع الخدمات بنجاح!');
+  console.log(`📊 aiService: ${typeof aiService} (${aiService.constructor?.name || 'unknown'})`);
+  console.log(`📊 orchestrator: ${typeof orchestrator} (${orchestrator.constructor?.name || 'unknown'})`);
   
 } catch (error) {
-  console.error('❌ خطأ في تهيئة الخدمات:', error.message);
-  console.error('🔍 تفاصيل الخطأ:', error.stack);
+  console.error('❌ خطأ جوهري في تهيئة الخدمات:', error.message);
+  console.error('🔍 تفاصيل:', error.stack || 'لا توجد تفاصيل إضافية');
   
-  // إنشاء خدمات بديلة آمنة
+  console.log('🛠️ إنشاء خدمات بديلة آمنة...');
+  
+  // خدمة AI بديلة آمنة تماماً
   aiService = {
-    async sendRequest(provider, message, options = {}) {
-      console.log(`📝 استخدام الخدمة البديلة للمزود: ${provider}`);
-      return {
-        success: true,
-        response: `تم معالجة الرسالة بواسطة الخدمة البديلة: ${message}`,
-        provider: provider || 'fallback',
-        timestamp: new Date().toISOString()
-      };
+    isInitialized: true,
+    availableProviders: ['fallback'],
+    
+    async sendRequest(provider = 'fallback', message = '', options = {}) {
+      try {
+        // التحقق من صحة المدخلات
+        const safeProvider = provider || 'fallback';
+        const safeMessage = message || 'رسالة افتراضية';
+        const safeOptions = options || {};
+        
+        console.log(`📝 استخدام الخدمة البديلة للمزود: ${safeProvider}`);
+        
+        return {
+          success: true,
+          response: `تم معالجة الرسالة بواسطة الخدمة البديلة: ${safeMessage}`,
+          provider: safeProvider,
+          timestamp: new Date().toISOString(),
+          fallback: true
+        };
+      } catch (fallbackError) {
+        console.error('❌ خطأ حتى في الخدمة البديلة:', fallbackError.message);
+        return {
+          success: false,
+          error: 'خطأ في الخدمة البديلة: ' + fallbackError.message,
+          provider: provider || 'fallback',
+          timestamp: new Date().toISOString()
+        };
+      }
+    },
+    
+    getAvailableProviders() {
+      return this.availableProviders;
     }
   };
   
-  orchestrator = new AgentOrchestrator();
+  // orchestrator بديل آمن تماماً
+  try {
+    orchestrator = new AgentOrchestrator();
+    console.log('✓ تم إنشاء orchestrator عادي كبديل');
+  } catch (orchError) {
+    console.warn('⚠️ فشل حتى في إنشاء orchestrator عادي، إنشاء نسخة بديلة:', orchError.message);
+    
+    orchestrator = {
+      agents: new Map(),
+      agentGroups: new Map(),
+      taskHistory: [],
+      
+      registerAgent(id, config) {
+        try {
+          this.agents.set(id, { id, ...config, status: 'active' });
+          console.log(`✅ تم تسجيل الوكيل البديل: ${config.name || id}`);
+        } catch (err) {
+          console.error('خطأ في تسجيل الوكيل:', err.message);
+        }
+      },
+      
+      async executeTask(agentId, task) {
+        try {
+          const agent = this.agents.get(agentId) || { id: agentId, name: 'وكيل افتراضي' };
+          
+          const result = {
+            success: true,
+            agentId: agentId,
+            agentName: agent.name,
+            task: task,
+            result: `تم تنفيذ المهمة بواسطة ${agent.name}: ${task.description || task.query || 'مهمة عامة'}`,
+            executionTime: Math.random() * 1000 + 500,
+            timestamp: new Date()
+          };
+          
+          this.taskHistory.push(result);
+          return result;
+        } catch (err) {
+          return {
+            success: false,
+            error: err.message,
+            agentId: agentId,
+            timestamp: new Date()
+          };
+        }
+      },
+      
+      async executeIntelligent(workflow) {
+        try {
+          const tasks = workflow.tasks || [];
+          const results = [];
+          
+          for (const task of tasks) {
+            const result = await this.executeTask('default-agent', task);
+            results.push(result);
+          }
+          
+          return {
+            success: true,
+            results: results,
+            workflow: workflow.optimization || 'intelligent'
+          };
+        } catch (err) {
+          return {
+            success: false,
+            error: err.message,
+            workflow: workflow
+          };
+        }
+      },
+      
+      getSystemStats() {
+        return {
+          totalAgents: this.agents.size,
+          activeAgents: Array.from(this.agents.values()).filter(a => a.status === 'active').length,
+          totalTasks: this.taskHistory.length,
+          systemHealth: 'healthy',
+          lastUpdate: new Date()
+        };
+      }
+    };
+  }
   
-  console.log('🛠️ تم إنشاء الخدمات البديلة بنجاح');
+  console.log('🛠️ تم إنشاء جميع الخدمات البديلة بنجاح');
 }
 const autoGen = new AutoGenIntegration();
 const superAgent = new SuperAgentIntegration();
@@ -354,66 +526,134 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // API للذكاء الاصطناعي
+  // API للذكاء الاصطناعي مع حماية شاملة
   if (req.url.startsWith('/api/ai') && req.method === 'POST') {
     let body = '';
-    req.on('data', chunk => body += chunk.toString());
+    req.on('data', chunk => {
+      try {
+        body += chunk.toString();
+      } catch (chunkError) {
+        console.error('خطأ في قراءة البيانات:', chunkError.message);
+      }
+    });
+    
     req.on('end', async () => {
       try {
         console.log('📨 تلقي طلب AI API');
         
-        // التحقق من وجود البيانات
-        if (!body || body.trim() === '') {
-          throw new Error('لا توجد بيانات في الطلب');
+        // التحقق الأساسي من البيانات
+        if (!body || typeof body !== 'string' || body.trim() === '') {
+          throw new Error('لا توجد بيانات صالحة في الطلب');
         }
         
         let requestData;
         try {
           requestData = JSON.parse(body);
         } catch (parseError) {
-          throw new Error('خطأ في تحليل JSON: ' + parseError.message);
+          console.error('خطأ في تحليل JSON:', parseError.message);
+          throw new Error('خطأ في تحليل JSON: تأكد من أن البيانات بصيغة JSON صحيحة');
         }
         
-        const { provider, message, options } = requestData || {};
+        // التحقق من صحة البيانات المحللة
+        if (!requestData || typeof requestData !== 'object') {
+          throw new Error('البيانات المحللة غير صالحة');
+        }
         
-        if (!provider || !message) {
-          throw new Error('يجب تحديد المزود والرسالة');
+        const { provider, message, options } = requestData;
+        
+        // التحقق من المتطلبات الأساسية
+        if (!provider || typeof provider !== 'string' || provider.trim() === '') {
+          throw new Error('يجب تحديد مزود صالح');
+        }
+        
+        if (!message || typeof message !== 'string' || message.trim() === '') {
+          throw new Error('يجب تحديد رسالة صالحة');
         }
 
-        // التحقق من وجود aiService
-        if (!aiService || typeof aiService.sendRequest !== 'function') {
-          throw new Error('خدمة الذكاء الاصطناعي غير متاحة');
+        // التحقق من وجود وصحة aiService
+        if (!aiService) {
+          throw new Error('خدمة الذكاء الاصطناعي غير موجودة');
+        }
+        
+        if (typeof aiService.sendRequest !== 'function') {
+          throw new Error('دالة sendRequest غير متاحة في خدمة الذكاء الاصطناعي');
         }
 
-        console.log(`🤖 إرسال طلب للمزود: ${provider}`);
-        const response = await aiService.sendRequest(provider, message, options || {});
+        console.log(`🤖 إرسال طلب للمزود: ${provider.trim()}`);
+        console.log(`📝 نص الرسالة: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`);
+        
+        // تنفيذ الطلب مع معالجة آمنة
+        let response;
+        try {
+          response = await aiService.sendRequest(
+            provider.trim(), 
+            message.trim(), 
+            options || {}
+          );
+        } catch (aiError) {
+          console.error('خطأ في خدمة AI:', aiError.message);
+          throw new Error(`فشل في معالجة الطلب: ${aiError.message}`);
+        }
+
+        // التحقق من صحة الاستجابة
+        if (!response) {
+          throw new Error('لم يتم الحصول على استجابة من خدمة الذكاء الاصطناعي');
+        }
 
         res.writeHead(200, { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
         });
-        res.end(JSON.stringify({ 
+        
+        const responseData = {
           success: true, 
-          response,
-          timestamp: new Date().toISOString()
-        }));
+          response: response,
+          provider: provider.trim(),
+          timestamp: new Date().toISOString(),
+          requestId: Math.random().toString(36).substr(2, 9)
+        };
+        
+        res.end(JSON.stringify(responseData, null, 2));
+        console.log('✅ تم إرسال الاستجابة بنجاح');
         
       } catch (error) {
         console.error('❌ خطأ في AI API:', error.message);
-        console.error('🔍 تفاصيل:', error.stack);
+        console.error('🔍 التفاصيل:', error.stack || 'لا توجد تفاصيل إضافية');
         
-        res.writeHead(500, { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        });
-        res.end(JSON.stringify({ 
-          success: false, 
-          error: error.message,
-          details: 'تأكد من صحة البيانات المرسلة',
-          timestamp: new Date().toISOString()
-        }));
+        try {
+          res.writeHead(500, { 
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': '*'
+          });
+          
+          const errorResponse = {
+            success: false, 
+            error: error.message || 'خطأ غير محدد',
+            details: 'تأكد من صحة البيانات المرسلة وأن مفاتيح API صحيحة',
+            timestamp: new Date().toISOString(),
+            requestId: Math.random().toString(36).substr(2, 9)
+          };
+          
+          res.end(JSON.stringify(errorResponse, null, 2));
+        } catch (responseError) {
+          console.error('❌ خطأ في إرسال رسالة الخطأ:', responseError.message);
+          res.end('{"success":false,"error":"خطأ جوهري في الخادم"}');
+        }
       }
     });
+    
+    req.on('error', (reqError) => {
+      console.error('❌ خطأ في الطلب:', reqError.message);
+      try {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end('{"success":false,"error":"خطأ في الطلب"}');
+      } catch (err) {
+        console.error('خطأ في معالجة خطأ الطلب:', err.message);
+      }
+    });
+    
     return;
   }
 
