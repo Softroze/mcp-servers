@@ -3,7 +3,7 @@
 const AI_CONFIG = {
   // OpenAI Configuration
   openai: {
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env?.OPENAI_API_KEY || null,
     baseURL: 'https://api.openai.com/v1',
     models: {
       gpt4: 'gpt-4-turbo-preview',
@@ -14,7 +14,7 @@ const AI_CONFIG = {
 
   // Anthropic Claude Configuration
   anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: process.env?.ANTHROPIC_API_KEY || null,
     baseURL: 'https://api.anthropic.com/v1',
     models: {
       claude3: 'claude-3-opus-20240229',
@@ -25,7 +25,7 @@ const AI_CONFIG = {
 
   // Google AI Configuration
   google: {
-    apiKey: process.env.GOOGLE_API_KEY,
+    apiKey: process.env?.GOOGLE_API_KEY || null,
     baseURL: 'https://generativelanguage.googleapis.com/v1',
     models: {
       gemini: 'gemini-pro',
@@ -35,7 +35,7 @@ const AI_CONFIG = {
 
   // Hugging Face Configuration (أفضل النماذج المجانية)
   huggingface: {
-    token: process.env.HUGGINGFACE_API_TOKEN,
+    token: process.env?.HUGGINGFACE_API_TOKEN || null,
     baseURL: 'https://api-inference.huggingface.co/models',
     models: {
       // نماذج النصوص المجانية الأفضل
@@ -62,7 +62,7 @@ const AI_CONFIG = {
 
   // OpenRouter Configuration (نماذج مجانية)
   openrouter: {
-    apiKey: process.env.OPENROUTER_API_KEY,
+    apiKey: process.env?.OPENROUTER_API_KEY || null,
     baseURL: 'https://openrouter.ai/api/v1',
     models: {
       // نماذج مجانية من OpenRouter
@@ -83,7 +83,7 @@ const AI_CONFIG = {
 
   // Local Models Configuration
   local: {
-    baseURL: process.env.LOCAL_MODEL_URL || 'http://localhost:1234/v1',
+    baseURL: process.env?.LOCAL_MODEL_URL || 'http://localhost:1234/v1',
     models: {
       llama: 'llama-2-7b-chat',
       mistral: 'mistral-7b-instruct'

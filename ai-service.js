@@ -3,8 +3,12 @@ const { AI_CONFIG, validateAPIKeys, createAIClient } = require('./ai-config');
 
 class AIService {
   constructor() {
-    // التحقق من المفاتيح عند بدء الخدمة
-    validateAPIKeys();
+    try {
+      // التحقق من المفاتيح عند بدء الخدمة
+      validateAPIKeys();
+    } catch (error) {
+      console.warn('تحذير في تحميل AI Config:', error.message);
+    }
   }
 
   // دالة عامة لإرسال طلب للذكاء الاصطناعي

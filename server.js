@@ -201,9 +201,25 @@ class SemanticKernelIntegration {
   }
 }
 
-// إنشاء الخدمات
-const aiService = new AIService();
-const orchestrator = new AgentOrchestrator();
+// إنشاء الخدمات مع معالجة الأخطاء
+let aiService, orchestrator;
+try {
+  aiService = new AIService();
+  orchestrator = new AgentOrchestrator();
+} catch (error) {
+  console.error('خطأ في تهيئة الخدمات:', error.message);
+  // إنشاء خدمات بديلة في حالة الخطأ
+  aiService = {
+    async sendRequest(provider, message, options) {
+      return {
+        success: false,
+        error: 'خدمة الذكاء الاصطناعي غير متاحة',
+        response: 'عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً'
+      };
+    }
+  };
+  orchestrator = new AgentOrchestrator();
+}
 const autoGen = new AutoGenIntegration();
 const superAgent = new SuperAgentIntegration();
 const crewAI = new CrewAIIntegration();
@@ -299,8 +315,14 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => body += chunk.toString());
     req.on('end', async () => {
       try {
-        const { provider, message, options } = JSON.parse(body);
-        const response = await aiService.sendRequest(provider, message, options);
+        const requestData = JSON.parse(body);
+        const { provider, message, options } = requestData;
+        
+        if (!provider || !message) {
+          throw new Error('يجب تحديد المزود والرسالة');
+        }
+
+        const response = await aiService.sendRequest(provider, message, options || {});
 
         res.writeHead(200, { 
           'Content-Type': 'application/json',
@@ -308,8 +330,16 @@ const server = http.createServer(async (req, res) => {
         });
         res.end(JSON.stringify({ success: true, response }));
       } catch (error) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: error.message }));
+        console.error('خطأ في AI API:', error.message);
+        res.writeHead(500, { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({ 
+          success: false, 
+          error: error.message,
+          details: 'تأكد من صحة البيانات المرسلة'
+        }));
       }
     });
     return;
