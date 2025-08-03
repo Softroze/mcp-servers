@@ -33,10 +33,52 @@ const AI_CONFIG = {
     }
   },
 
-  // Hugging Face Configuration
+  // Hugging Face Configuration (أفضل النماذج المجانية)
   huggingface: {
     token: process.env.HUGGINGFACE_API_TOKEN,
-    baseURL: 'https://api-inference.huggingface.co/models'
+    baseURL: 'https://api-inference.huggingface.co/models',
+    models: {
+      // نماذج النصوص المجانية الأفضل
+      llama3: 'meta-llama/Meta-Llama-3-8B-Instruct',
+      mistral: 'mistralai/Mistral-7B-Instruct-v0.1',
+      phi3: 'microsoft/Phi-3-mini-4k-instruct',
+      gemma: 'google/gemma-7b-it',
+      
+      // نماذج الدردشة والمحادثة
+      chatglm: 'THUDM/chatglm3-6b',
+      baichuan: 'baichuan-inc/Baichuan2-7B-Chat',
+      qwen: 'Qwen/Qwen1.5-7B-Chat',
+      
+      // نماذج متخصصة
+      codellama: 'codellama/CodeLlama-7b-Instruct-hf',
+      zephyr: 'HuggingFaceH4/zephyr-7b-beta',
+      vicuna: 'lmsys/vicuna-7b-v1.5',
+      
+      // نماذج صغيرة وسريعة
+      tinyllama: 'TinyLlama/TinyLlama-1.1B-Chat-v1.0',
+      stablelm: 'stabilityai/stablelm-2-zephyr-1_6b'
+    }
+  },
+
+  // OpenRouter Configuration (نماذج مجانية)
+  openrouter: {
+    apiKey: process.env.OPENROUTER_API_KEY,
+    baseURL: 'https://openrouter.ai/api/v1',
+    models: {
+      // نماذج مجانية من OpenRouter
+      llama3Free: 'meta-llama/llama-3-8b-instruct:free',
+      mistralFree: 'mistralai/mistral-7b-instruct:free',
+      codellama: 'codellama/codellama-34b-instruct:free',
+      
+      // نماذج قوية مجانية
+      mythomaxFree: 'gryphe/mythomix-8x7b:free',
+      toppy: 'undi95/toppy-m-7b:free',
+      capybara: 'nousresearch/nous-capybara-7b:free',
+      
+      // نماذج للتطبيقات المختلفة
+      openchat: 'openchat/openchat-7b:free',
+      neural: 'intel/neural-chat-7b:free'
+    }
   },
 
   // Local Models Configuration
@@ -52,17 +94,35 @@ const AI_CONFIG = {
 // دالة للتحقق من توفر المفاتيح
 function validateAPIKeys() {
   const missing = [];
+  const available = [];
   
   if (!AI_CONFIG.openai.apiKey) missing.push('OPENAI_API_KEY');
+  else available.push('OpenAI');
+  
   if (!AI_CONFIG.anthropic.apiKey) missing.push('ANTHROPIC_API_KEY');
+  else available.push('Anthropic');
+  
   if (!AI_CONFIG.google.apiKey) missing.push('GOOGLE_API_KEY');
+  else available.push('Google');
+  
   if (!AI_CONFIG.huggingface.token) missing.push('HUGGINGFACE_API_TOKEN');
+  else available.push('Hugging Face (FREE)');
+  
+  if (!AI_CONFIG.openrouter.apiKey) missing.push('OPENROUTER_API_KEY');
+  else available.push('OpenRouter (FREE)');
+  
+  console.log('🤖 النماذج المتاحة:');
+  if (available.length > 0) {
+    console.log('✅ متوفر:', available.join(', '));
+  }
   
   if (missing.length > 0) {
     console.warn('⚠️  المفاتيح المفقودة:', missing.join(', '));
-    console.warn('يرجى إضافة هذه المفاتيح في قسم Secrets');
-  } else {
-    console.log('✅ جميع مفاتيح API متوفرة');
+    console.warn('📝 يرجى إضافة هذه المفاتيح في قسم Secrets للوصول لمزيد من النماذج');
+  }
+  
+  if (available.includes('Hugging Face (FREE)') || available.includes('OpenRouter (FREE)')) {
+    console.log('🎉 لديك وصول للنماذج المجانية القوية!');
   }
   
   return missing;
@@ -92,11 +152,39 @@ function createAIClient(provider) {
     case 'huggingface':
       return {
         token: AI_CONFIG.huggingface.token,
-        baseURL: AI_CONFIG.huggingface.baseURL
+        baseURL: AI_CONFIG.huggingface.baseURL,
+        models: AI_CONFIG.huggingface.models
+      };
+    case 'openrouter':
+      return {
+        apiKey: AI_CONFIG.openrouter.apiKey,
+        baseURL: AI_CONFIG.openrouter.baseURL,
+        models: AI_CONFIG.openrouter.models
       };
     default:
       throw new Error(`مزود غير مدعوم: ${provider}`);
   }
+}
+
+// الحصول على أفضل نموذج مجاني متاح
+function getBestFreeModel() {
+  if (AI_CONFIG.huggingface.token) {
+    return {
+      provider: 'huggingface',
+      model: 'meta-llama/Meta-Llama-3-8B-Instruct',
+      name: 'Llama 3 8B (مجاني)'
+    };
+  }
+  
+  if (AI_CONFIG.openrouter.apiKey) {
+    return {
+      provider: 'openrouter',
+      model: 'meta-llama/llama-3-8b-instruct:free',
+      name: 'Llama 3 8B OpenRouter (مجاني)'
+    };
+  }
+  
+  return null;
 }
 
 module.exports = {

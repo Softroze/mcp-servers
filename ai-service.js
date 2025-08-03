@@ -21,6 +21,8 @@ class AIService {
           return await this.callGoogle(client, message, options);
         case 'huggingface':
           return await this.callHuggingFace(client, message, options);
+        case 'openrouter':
+          return await this.callOpenRouter(client, message, options);
         default:
           throw new Error(`مزود غير مدعوم: ${provider}`);
       }
@@ -101,9 +103,9 @@ class AIService {
     return data.candidates[0].content.parts[0].text;
   }
 
-  // استدعاء Hugging Face
+  // استدعاء Hugging Face (النماذج المجانية)
   async callHuggingFace(client, message, options) {
-    const model = options.model || 'microsoft/DialoGPT-medium';
+    const model = options.model || client.models.llama3;
     const response = await fetch(`${client.baseURL}/${model}`, {
       method: 'POST',
       headers: {
@@ -113,18 +115,53 @@ class AIService {
       body: JSON.stringify({
         inputs: message,
         parameters: {
-          max_length: options.maxTokens || 100,
-          temperature: options.temperature || 0.7
+          max_new_tokens: options.maxTokens || 512,
+          temperature: options.temperature || 0.7,
+          do_sample: true,
+          return_full_text: false
         }
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Hugging Face API Error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Hugging Face API Error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    return data[0].generated_text || data.generated_text;
+    
+    if (Array.isArray(data)) {
+      return data[0]?.generated_text || data[0]?.text || 'لا توجد استجابة';
+    }
+    
+    return data.generated_text || data.text || 'لا توجد استجابة';
+  }
+
+  // استدعاء OpenRouter (النماذج المجانية)
+  async callOpenRouter(client, message, options) {
+    const response = await fetch(`${client.baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${client.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://replit.com',
+        'X-Title': 'AI Agents System'
+      },
+      body: JSON.stringify({
+        model: options.model || client.models.llama3Free,
+        messages: [{ role: 'user', content: message }],
+        max_tokens: options.maxTokens || 1000,
+        temperature: options.temperature || 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenRouter API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
   }
 }
 
