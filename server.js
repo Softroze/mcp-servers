@@ -2,15 +2,22 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// محاكاة الفئات المطلوبة
-class AIService {
-  async sendRequest(provider, message, options) {
-    return {
-      success: true,
-      response: `تم معالجة الرسالة: ${message}`,
-      provider: provider
-    };
-  }
+// تحميل خدمات الذكاء الاصطناعي الحقيقية
+let AIService;
+try {
+  AIService = require('./ai-service');
+} catch (error) {
+  console.log('⚠️ تحذير: لم يتم العثور على ai-service.js، سيتم استخدام خدمة بديلة');
+  // خدمة بديلة في حالة عدم وجود الملف
+  AIService = class {
+    async sendRequest(provider, message, options) {
+      return {
+        success: true,
+        response: `تم معالجة الرسالة باستخدام الخدمة البديلة: ${message}`,
+        provider: provider
+      };
+    }
+  };
 }
 
 class AgentOrchestrator {
@@ -204,10 +211,12 @@ class SemanticKernelIntegration {
 // إنشاء الخدمات مع معالجة الأخطاء
 let aiService, orchestrator;
 try {
+  console.log('🔧 تهيئة خدمات الذكاء الاصطناعي...');
   aiService = new AIService();
   orchestrator = new AgentOrchestrator();
+  console.log('✅ تم تهيئة الخدمات بنجاح');
 } catch (error) {
-  console.error('خطأ في تهيئة الخدمات:', error.message);
+  console.error('❌ خطأ في تهيئة الخدمات:', error.message);
   // إنشاء خدمات بديلة في حالة الخطأ
   aiService = {
     async sendRequest(provider, message, options) {
@@ -514,19 +523,38 @@ const server = http.createServer(async (req, res) => {
 // بدء الخادم
 const port = process.env.PORT || 5000;
 server.listen(port, '0.0.0.0', async () => {
-  console.log(`🚀 الخادم يعمل الآن على: http://0.0.0.0:${port}/`);
+  console.log('🚀 ========================================');
+  console.log('🤖 نظام الوكلاء الذكيين الموحد');
+  console.log('🚀 ========================================');
+  console.log(`🌐 الخادم يعمل على: http://0.0.0.0:${port}/`);
   console.log(`📊 لوحة التحكم الموحدة: http://0.0.0.0:${port}/unified-dashboard.html`);
-  console.log(`🤖 واجهة إدارة الوكلاء: http://0.0.0.0:${port}/agent-management.html`);
+  console.log(`🤖 إدارة الوكلاء: http://0.0.0.0:${port}/agent-management.html`);
+  console.log(`💬 واجهة المحادثة: http://0.0.0.0:${port}/chat-interface.html`);
+  console.log('🚀 ========================================');
+
+  // التحقق من مفاتيح API
+  try {
+    const { validateAPIKeys } = require('./ai-config');
+    const missingKeys = validateAPIKeys();
+    if (missingKeys.length === 0) {
+      console.log('🎉 جميع مفاتيح API متوفرة ومُكونة بشكل صحيح!');
+    }
+  } catch (error) {
+    console.log(`⚠️ تحذير في التحقق من مفاتيح API: ${error.message}`);
+  }
 
   try {
     await semanticKernel.initialize();
-    console.log(`✅ تم تهيئة جميع الأنظمة بنجاح`);
+    console.log(`✅ تم تهيئة Semantic Kernel بنجاح`);
   } catch (error) {
-    console.log(`⚠️ تحذير: ${error.message}`);
+    console.log(`⚠️ تحذير Semantic Kernel: ${error.message}`);
   }
 
-  console.log(`✨ النظام الموحد للوكلاء الذكيين جاهز للاستخدام!`);
-  console.log(`📈 عدد الوكلاء المُسجلة: ${orchestrator.agents.size}`);
+  console.log('🚀 ========================================');
+  console.log(`✨ النظام جاهز للاستخدام!`);
+  console.log(`🤖 عدد الوكلاء المُسجلة: ${orchestrator.agents.size}`);
+  console.log(`🔌 الأنظمة المُدمجة: MCP + AutoGen + SuperAgent + CrewAI + Semantic Kernel`);
+  console.log('🚀 ========================================');
 });
 
 // معالجة أخطاء الخادم
