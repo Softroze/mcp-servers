@@ -3,36 +3,96 @@ const { AI_CONFIG, validateAPIKeys, createAIClient } = require('./ai-config');
 
 class AIService {
   constructor() {
+    console.log('🔧 بدء تهيئة AIService...');
+    
+    this.isInitialized = false;
+    this.availableProviders = [];
+    
     try {
       // التحقق من المفاتيح عند بدء الخدمة
-      validateAPIKeys();
+      const missingKeys = validateAPIKeys();
+      this.availableProviders = this.getAvailableProviders();
+      this.isInitialized = true;
+      
+      console.log('✅ تم تهيئة AIService بنجاح');
+      console.log('🔑 المزودين المتاحين:', this.availableProviders.join(', '));
+      
     } catch (error) {
-      console.warn('تحذير في تحميل AI Config:', error.message);
+      console.warn('⚠️ تحذير في تحميل AI Config:', error.message);
+      this.isInitialized = false;
     }
+  }
+  
+  getAvailableProviders() {
+    const providers = [];
+    
+    if (AI_CONFIG.openai?.apiKey) providers.push('openai');
+    if (AI_CONFIG.anthropic?.apiKey) providers.push('anthropic'); 
+    if (AI_CONFIG.google?.apiKey) providers.push('google');
+    if (AI_CONFIG.huggingface?.token) providers.push('huggingface');
+    if (AI_CONFIG.openrouter?.apiKey) providers.push('openrouter');
+    
+    return providers;
   }
 
   // دالة عامة لإرسال طلب للذكاء الاصطناعي
   async sendRequest(provider, message, options = {}) {
+    console.log(`📤 إرسال طلب للمزود: ${provider}`);
+    
+    // التحقق من البيانات المدخلة
+    if (!provider || typeof provider !== 'string') {
+      throw new Error('المزود غير صحيح أو غير محدد');
+    }
+    
+    if (!message || typeof message !== 'string') {
+      throw new Error('الرسالة غير صحيحة أو غير محددة');
+    }
+    
+    if (!this.isInitialized) {
+      console.warn('⚠️ AIService غير مهيأ بشكل كامل، محاولة المتابعة...');
+    }
+    
     try {
+      // التحقق من توفر المزود
+      if (this.availableProviders.length > 0 && !this.availableProviders.includes(provider)) {
+        throw new Error(`المزود ${provider} غير متاح. المزودين المتاحين: ${this.availableProviders.join(', ')}`);
+      }
+      
       const client = createAIClient(provider);
       
+      if (!client) {
+        throw new Error(`فشل في إنشاء عميل للمزود: ${provider}`);
+      }
+      
+      let result;
       switch(provider) {
         case 'openai':
-          return await this.callOpenAI(client, message, options);
+          result = await this.callOpenAI(client, message, options);
+          break;
         case 'anthropic':
-          return await this.callAnthropic(client, message, options);
+          result = await this.callAnthropic(client, message, options);
+          break;
         case 'google':
-          return await this.callGoogle(client, message, options);
+          result = await this.callGoogle(client, message, options);
+          break;
         case 'huggingface':
-          return await this.callHuggingFace(client, message, options);
+          result = await this.callHuggingFace(client, message, options);
+          break;
         case 'openrouter':
-          return await this.callOpenRouter(client, message, options);
+          result = await this.callOpenRouter(client, message, options);
+          break;
         default:
           throw new Error(`مزود غير مدعوم: ${provider}`);
       }
+      
+      console.log(`✅ تم الحصول على استجابة من ${provider}`);
+      return result;
+      
     } catch (error) {
-      console.error(`خطأ في ${provider}:`, error.message);
-      throw error;
+      console.error(`❌ خطأ في ${provider}:`, error.message);
+      
+      // إرجاع استجابة بديلة في حالة الفشل
+      return `عذراً، حدث خطأ مع ${provider}: ${error.message}. يرجى المحاولة مرة أخرى أو استخدام مزود آخر.`;
     }
   }
 

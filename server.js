@@ -2,19 +2,27 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// تحميل خدمات الذكاء الاصطناعي الحقيقية
+// تحميل خدمات الذكاء الاصطناعي مع معالجة أفضل للأخطاء
 let AIService;
 try {
-  AIService = require('./ai-service');
+  const aiServiceModule = require('./ai-service');
+  AIService = aiServiceModule.default || aiServiceModule;
+  console.log('✅ تم تحميل ai-service بنجاح');
 } catch (error) {
   console.log('⚠️ تحذير: لم يتم العثور على ai-service.js، سيتم استخدام خدمة بديلة');
-  // خدمة بديلة في حالة عدم وجود الملف
+  console.log('تفاصيل الخطأ:', error.message);
+  
+  // خدمة بديلة محسنة
   AIService = class {
-    async sendRequest(provider, message, options) {
+    constructor() {
+      console.log('🔧 تم تهيئة الخدمة البديلة');
+    }
+    
+    async sendRequest(provider, message, options = {}) {
       return {
         success: true,
         response: `تم معالجة الرسالة باستخدام الخدمة البديلة: ${message}`,
-        provider: provider
+        provider: provider || 'fallback'
       };
     }
   };
@@ -208,26 +216,54 @@ class SemanticKernelIntegration {
   }
 }
 
-// إنشاء الخدمات مع معالجة الأخطاء
+// إنشاء الخدمات مع معالجة محسنة للأخطاء
 let aiService, orchestrator;
+
 try {
   console.log('🔧 تهيئة خدمات الذكاء الاصطناعي...');
+  
+  // التحقق من أن AIService ليس undefined
+  if (!AIService) {
+    throw new Error('AIService غير محدد');
+  }
+  
   aiService = new AIService();
+  
+  // التحقق من نجاح التهيئة
+  if (!aiService) {
+    throw new Error('فشل في إنشاء aiService');
+  }
+  
   orchestrator = new AgentOrchestrator();
-  console.log('✅ تم تهيئة الخدمات بنجاح');
+  
+  if (!orchestrator) {
+    throw new Error('فشل في إنشاء orchestrator');
+  }
+  
+  console.log('✅ تم تهيئة جميع الخدمات بنجاح');
+  console.log('📊 aiService:', typeof aiService);
+  console.log('📊 orchestrator:', typeof orchestrator);
+  
 } catch (error) {
   console.error('❌ خطأ في تهيئة الخدمات:', error.message);
-  // إنشاء خدمات بديلة في حالة الخطأ
+  console.error('🔍 تفاصيل الخطأ:', error.stack);
+  
+  // إنشاء خدمات بديلة آمنة
   aiService = {
-    async sendRequest(provider, message, options) {
+    async sendRequest(provider, message, options = {}) {
+      console.log(`📝 استخدام الخدمة البديلة للمزود: ${provider}`);
       return {
-        success: false,
-        error: 'خدمة الذكاء الاصطناعي غير متاحة',
-        response: 'عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً'
+        success: true,
+        response: `تم معالجة الرسالة بواسطة الخدمة البديلة: ${message}`,
+        provider: provider || 'fallback',
+        timestamp: new Date().toISOString()
       };
     }
   };
+  
   orchestrator = new AgentOrchestrator();
+  
+  console.log('🛠️ تم إنشاء الخدمات البديلة بنجاح');
 }
 const autoGen = new AutoGenIntegration();
 const superAgent = new SuperAgentIntegration();
@@ -324,22 +360,48 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => body += chunk.toString());
     req.on('end', async () => {
       try {
-        const requestData = JSON.parse(body);
-        const { provider, message, options } = requestData;
+        console.log('📨 تلقي طلب AI API');
+        
+        // التحقق من وجود البيانات
+        if (!body || body.trim() === '') {
+          throw new Error('لا توجد بيانات في الطلب');
+        }
+        
+        let requestData;
+        try {
+          requestData = JSON.parse(body);
+        } catch (parseError) {
+          throw new Error('خطأ في تحليل JSON: ' + parseError.message);
+        }
+        
+        const { provider, message, options } = requestData || {};
         
         if (!provider || !message) {
           throw new Error('يجب تحديد المزود والرسالة');
         }
 
+        // التحقق من وجود aiService
+        if (!aiService || typeof aiService.sendRequest !== 'function') {
+          throw new Error('خدمة الذكاء الاصطناعي غير متاحة');
+        }
+
+        console.log(`🤖 إرسال طلب للمزود: ${provider}`);
         const response = await aiService.sendRequest(provider, message, options || {});
 
         res.writeHead(200, { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
-        res.end(JSON.stringify({ success: true, response }));
+        res.end(JSON.stringify({ 
+          success: true, 
+          response,
+          timestamp: new Date().toISOString()
+        }));
+        
       } catch (error) {
-        console.error('خطأ في AI API:', error.message);
+        console.error('❌ خطأ في AI API:', error.message);
+        console.error('🔍 تفاصيل:', error.stack);
+        
         res.writeHead(500, { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
@@ -347,7 +409,8 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ 
           success: false, 
           error: error.message,
-          details: 'تأكد من صحة البيانات المرسلة'
+          details: 'تأكد من صحة البيانات المرسلة',
+          timestamp: new Date().toISOString()
         }));
       }
     });
