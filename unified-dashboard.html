@@ -483,7 +483,23 @@
                 });
 
                 const result = await response.json();
-                displayResults(result.data);
+                
+                // التحقق من صحة البيانات
+                if (!result) {
+                    throw new Error('لم يتم الحصول على استجابة صحيحة');
+                }
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'فشل في تنفيذ المهمة');
+                }
+                
+                // التأكد من وجود البيانات قبل عرضها
+                const dataToDisplay = result.data || result || {
+                    success: false,
+                    error: 'لا توجد بيانات للعرض'
+                };
+                
+                displayResults(dataToDisplay);
             } catch (error) {
                 displayError(error.message);
             }
@@ -521,7 +537,12 @@
                 });
 
                 const result = await response.json();
-                displayAnalysisResults(result.data);
+                
+                if (!result || !result.success) {
+                    throw new Error(result?.error || 'فشل في التحليل');
+                }
+                
+                displayAnalysisResults(result.data || result);
             } catch (error) {
                 displayError(error.message);
             }
@@ -544,7 +565,12 @@
                 });
 
                 const result = await response.json();
-                displayHealthResults(result.data);
+                
+                if (!result || !result.success) {
+                    throw new Error(result?.error || 'فشل في فحص صحة النظام');
+                }
+                
+                displayHealthResults(result.data || result);
             } catch (error) {
                 displayError(error.message);
             }
@@ -567,7 +593,12 @@
                 });
 
                 const result = await response.json();
-                displayStats(result.data);
+                
+                if (!result || !result.success) {
+                    throw new Error(result?.error || 'فشل في الحصول على الإحصائيات');
+                }
+                
+                displayStats(result.data || result);
             } catch (error) {
                 displayError(error.message);
             }
@@ -592,6 +623,19 @@
             const resultsContent = document.getElementById('resultsContent');
 
             let html = '<h4>نتائج التنفيذ الموحد</h4>';
+
+            // التحقق من وجود البيانات
+            if (!data) {
+                html += `<div class="result-item" style="border-right-color: #e74c3c;">
+                    <div class="result-header">
+                        <span class="result-system">خطأ</span>
+                        <span class="result-status status-inactive">فشل</span>
+                    </div>
+                    <p style="color: red;">لا توجد بيانات للعرض</p>
+                </div>`;
+                resultsContent.innerHTML = html;
+                return;
+            }
 
             if (data.success) {
                 html += `<div class="result-item">
@@ -636,17 +680,26 @@
             const resultsContent = document.getElementById('resultsContent');
 
             let html = '<h4>تحليل أفضل نظام</h4>';
+            
+            if (!data) {
+                html += `<div class="result-item" style="border-right-color: #e74c3c;">
+                    <p style="color: red;">لا توجد بيانات تحليل للعرض</p>
+                </div>`;
+                resultsContent.innerHTML = html;
+                return;
+            }
+            
             html += `<div class="result-item">
                 <div class="result-header">
                     <span class="result-system">النظام الموصى به</span>
-                    <span class="result-status status-active">${data.recommendedSystem}</span>
+                    <span class="result-status status-active">${data.recommendedSystem || 'غير محدد'}</span>
                 </div>
-                <p><strong>السبب:</strong> ${data.reasoning}</p>
+                <p><strong>السبب:</strong> ${data.reasoning || 'لا يوجد سبب محدد'}</p>
                 <h5>النقاط لكل نظام:</h5>
                 <ul>
-                    ${Object.entries(data.scores).map(([system, score]) => 
+                    ${data.scores ? Object.entries(data.scores).map(([system, score]) => 
                         `<li><strong>${system}:</strong> ${(score * 100).toFixed(1)}%</li>`
-                    ).join('')}
+                    ).join('') : '<li>لا توجد نقاط متاحة</li>'}
                 </ul>
             </div>`;
 
