@@ -230,3 +230,4 @@ class AIService {
 }
 
 module.exports = AIService;
+module.exports.AIService = AIService;

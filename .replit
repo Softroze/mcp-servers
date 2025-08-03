@@ -6,7 +6,7 @@ channel = "stable-25_05"
 modules = ["nodejs-20"]
 
 [workflows]
-runButton = "Start Server"
+runButton = "Start AI System"
 
 [[workflows.workflow]]
 name = "Start Documentation Server"
@@ -42,6 +42,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[workflows.workflow]]
+name = "Start AI System"
+author = 35427550
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

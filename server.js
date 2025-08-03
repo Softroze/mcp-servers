@@ -5,9 +5,6 @@ const path = require('path');
 // تحميل خدمات الذكاء الاصطناعي مع معالجة شاملة للأخطاء
 let AIService;
 
-// التأكد من وجود الملفات المطلوبة أولاً
-const fs = require('fs');
-
 try {
   // التحقق من وجود ai-service.js
   if (fs.existsSync('./ai-service.js')) {
