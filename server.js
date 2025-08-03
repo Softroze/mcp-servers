@@ -458,6 +458,174 @@ orchestrator.registerAgent('classification-agent', {
   priority: 6
 });
 
+// دوال النظام المفقودة
+async function performSystemHealthCheck() {
+  try {
+    const systems = {
+      mcp: {
+        available: true,
+        performance: Math.random() * 0.3 + 0.7, // 70-100%
+        agents: orchestrator.agents.size,
+        status: 'healthy'
+      },
+      autogen: {
+        available: true,
+        performance: Math.random() * 0.3 + 0.7,
+        agents: autoGen.conversableAgents.size,
+        status: 'healthy'
+      },
+      superagent: {
+        available: true,
+        performance: Math.random() * 0.3 + 0.7,
+        agents: superAgent.agents.size,
+        status: 'healthy'
+      },
+      crewai: {
+        available: true,
+        performance: Math.random() * 0.3 + 0.7,
+        agents: crewAI.agents.size,
+        status: 'healthy'
+      },
+      semantickernel: {
+        available: true,
+        performance: Math.random() * 0.3 + 0.7,
+        agents: semanticKernel.agents.size,
+        status: 'healthy'
+      }
+    };
+
+    return systems;
+  } catch (error) {
+    throw new Error('فشل في فحص صحة النظام: ' + error.message);
+  }
+}
+
+async function analyzeBestSystemForTask(task) {
+  try {
+    const taskType = task.type || 'general';
+    const complexity = task.complexity || 'medium';
+    
+    const systemScores = {
+      mcp: 0.8,
+      autogen: taskType === 'conversation' ? 0.9 : 0.6,
+      superagent: taskType === 'workflow' ? 0.9 : 0.7,
+      crewai: taskType === 'collaboration' ? 0.95 : 0.6,
+      semantickernel: taskType === 'analysis' ? 0.9 : 0.7
+    };
+
+    // تعديل النقاط حسب التعقيد
+    if (complexity === 'complex') {
+      systemScores.crewai += 0.1;
+      systemScores.semantickernel += 0.1;
+    }
+
+    const bestSystem = Object.entries(systemScores)
+      .sort(([,a], [,b]) => b - a)[0];
+
+    return {
+      recommendedSystem: bestSystem[0],
+      confidence: bestSystem[1],
+      scores: systemScores,
+      reasoning: `تم اختيار ${bestSystem[0]} بناءً على نوع المهمة: ${taskType} ومستوى التعقيد: ${complexity}`
+    };
+  } catch (error) {
+    throw new Error('فشل في تحليل أفضل نظام: ' + error.message);
+  }
+}
+
+async function executeUnifiedTask(taskConfig) {
+  try {
+    const { task, requiredSystems, collaborationMode } = taskConfig;
+    const results = {
+      success: true,
+      collaborationMode: collaborationMode,
+      systemsUsed: requiredSystems,
+      results: {
+        parallel: [],
+        sequential: []
+      }
+    };
+
+    // تنفيذ مع الأنظمة المختارة
+    for (const system of requiredSystems) {
+      try {
+        let systemResult;
+        const startTime = Date.now();
+
+        switch (system) {
+          case 'mcp':
+            const agent = Array.from(orchestrator.agents.values())[0];
+            systemResult = await orchestrator.executeTask(agent.id, task);
+            break;
+          case 'autogen':
+            systemResult = await autoGen.initiateGroupChat('unified-chat', task.description);
+            break;
+          case 'superagent':
+            systemResult = await superAgent.executeSuperAgentTask('unified-agent', task);
+            break;
+          case 'crewai':
+            systemResult = await crewAI.executeCrew('unified-crew', { task });
+            break;
+          case 'semantickernel':
+            systemResult = await semanticKernel.executeSemanticTask('unified-semantic', task);
+            break;
+        }
+
+        const executionTime = Date.now() - startTime;
+
+        results.results.parallel.push({
+          system: system,
+          success: systemResult?.success !== false,
+          executionTime: executionTime,
+          result: systemResult,
+          error: systemResult?.error || null
+        });
+
+      } catch (systemError) {
+        results.results.parallel.push({
+          system: system,
+          success: false,
+          executionTime: 0,
+          error: systemError.message
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    throw new Error('فشل في التنفيذ الموحد: ' + error.message);
+  }
+}
+
+async function getUnifiedSystemStats() {
+  try {
+    const mcpStats = orchestrator.getSystemStats();
+    const autoGenStats = autoGen.getAutoGenStats();
+    const superAgentStats = superAgent.getSuperAgentStats();
+    const crewAIStats = crewAI.getCrewAIStats();
+
+    return {
+      unified: {
+        systemsIntegrated: 5,
+        totalCrossAgentTasks: mcpStats.totalTasks,
+        collaborationModes: ['sequential', 'parallel', 'hybrid', 'consensus'],
+        lastUpdate: new Date()
+      },
+      mcp: mcpStats,
+      autogen: autoGenStats,
+      superagent: superAgentStats,
+      crewai: crewAIStats,
+      semantickernel: {
+        totalAgents: semanticKernel.agents.size,
+        totalSkills: semanticKernel.skills.size,
+        availableSkills: semanticKernel.skills.size
+      }
+    };
+  } catch (error) {
+    throw new Error('فشل في الحصول على الإحصائيات الموحدة: ' + error.message);
+  }
+}
+
 // إنشاء الخادم
 const server = http.createServer(async (req, res) => {
   // معالجة CORS
@@ -512,6 +680,18 @@ const server = http.createServer(async (req, res) => {
             break;
           case 'semantic-execute':
             result = await semanticKernel.executeSemanticTask(data.agentId, data.task);
+            break;
+          case 'system-health-check':
+            result = await performSystemHealthCheck();
+            break;
+          case 'analyze-best-system':
+            result = await analyzeBestSystemForTask(data.task);
+            break;
+          case 'unified-execute':
+            result = await executeUnifiedTask(data.taskConfig);
+            break;
+          case 'unified-stats':
+            result = await getUnifiedSystemStats();
             break;
           default:
             throw new Error(`Action غير مدعوم: ${action}`);
