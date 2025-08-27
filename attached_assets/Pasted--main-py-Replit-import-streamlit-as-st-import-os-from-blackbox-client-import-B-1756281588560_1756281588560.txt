@@ -1,0 +1,155 @@
+# main.py - التطبيق الرئيسي في Replit
+import streamlit as st
+import os
+from blackbox_client import BlackboxAIClient
+import subprocess
+import tempfile
+
+# إعداد الصفحة
+st.set_page_config(
+    page_title="🔥 BlackboxAI + Replit Integration",
+    page_icon="🔥",
+    layout="wide"
+)
+
+# تهيئة العميل
+@st.cache_resource
+def init_blackbox_client():
+    return BlackboxAIClient()
+
+client = init_blackbox_client()
+
+st.title("🔥 BlackboxAI مع Replit - مولد الكود الذكي")
+
+# الشريط الجانبي
+with st.sidebar:
+    st.header("⚙️ الإعدادات")
+    
+    language = st.selectbox(
+        "لغة البرمجة:",
+        ["python", "javascript", "java", "cpp", "html", "css", "sql"]
+    )
+    
+    complexity = st.slider("مستوى التعقيد:", 1, 5, 3)
+    
+    include_comments = st.checkbox("تضمين التعليقات", True)
+
+# المنطقة الرئيسية
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    st.header("📝 وصف المشروع")
+    
+    user_prompt = st.text_area(
+        "اكتب وصف للكود المطلوب:",
+        height=200,
+        placeholder="مثال: اكتب برنامج لحساب الأرقام الأولية حتى رقم معين"
+    )
+    
+    if st.button("🚀 توليد الكود", type="primary"):
+        if user_prompt:
+            with st.spinner("جاري توليد الكود..."):
+                try:
+                    # تحسين الطلب
+                    enhanced_prompt = f"""
+                    Create a {language} program that {user_prompt}.
+                    Requirements:
+                    - Complexity level: {complexity}/5
+                    - Include comments: {include_comments}
+                    - Make it production-ready
+                    - Add error handling
+                    """
+                    
+                    generated_code = client.generate_code(enhanced_prompt, language)
+                    st.session_state.generated_code = generated_code
+                    st.session_state.current_language = language
+                    
+                except Exception as e:
+                    st.error(f"خطأ في توليد الكود: {str(e)}")
+
+with col2:
+    st.header("💻 الكود المولد")
+    
+    if 'generated_code' in st.session_state:
+        # عرض الكود
+        st.code(st.session_state.generated_code, language=st.session_state.current_language)
+        
+        # أزرار التحكم
+        col2_1, col2_2, col2_3 = st.columns(3)
+        
+        with col2_1:
+            if st.button("▶️ تشغيل"):
+                if st.session_state.current_language == "python":
+                    try:
+                        # إنشاء ملف مؤقت وتشغيله
+                        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+                            f.write(st.session_state.generated_code)
+                            temp_file = f.name
+                        
+                        result = subprocess.run(['python', temp_file], 
+                                              capture_output=True, text=True, timeout=10)
+                        
+                        if result.stdout:
+                            st.success("✅ تم التشغيل بنجاح!")
+                            st.text("النتيجة:")
+                            st.code(result.stdout)
+                        
+                        if result.stderr:
+                            st.error("❌ خطأ في التشغيل:")
+                            st.code(result.stderr)
+                            
+                        os.unlink(temp_file)
+                        
+                    except Exception as e:
+                        st.error(f"خطأ في التشغيل: {str(e)}")
+        
+        with col2_2:
+            if st.button("📋 نسخ"):
+                st.write("تم نسخ الكود!")
+                # يمكن إضافة JavaScript لنسخ الكود فعلياً
+        
+        with col2_3:
+            if st.button("💾 حفظ"):
+                filename = f"generated_code.{st.session_state.current_language}"
+                with open(filename, 'w') as f:
+                    f.write(st.session_state.generated_code)
+                st.success(f"تم حفظ الكود في {filename}")
+
+# قسم التحليل والشرح
+if 'generated_code' in st.session_state:
+    st.header("🔍 تحليل وشرح الكود")
+    
+    if st.button("شرح الكود"):
+        with st.spinner("جاري تحليل الكود..."):
+            try:
+                explanation = client.explain_code(st.session_state.generated_code)
+                st.write(explanation)
+            except Exception as e:
+                st.error(f"خطأ في الشرح: {str(e)}")
+
+# قسم التحسين
+st.header("⚡ تحسين الكود")
+
+optimization_type = st.selectbox(
+    "نوع التحسين:",
+    ["الأداء", "الأمان", "قابلية القراءة", "استهلاك الذاكرة"]
+)
+
+if st.button("تحسين الكود") and 'generated_code' in st.session_state:
+    with st.spinner("جاري تحسين الكود..."):
+        try:
+            optimization_prompt = f"""
+            Optimize this {st.session_state.current_language} code for {optimization_type}:
+            
+            {st.session_state.generated_code}
+            
+            Provide the optimized version with explanations of changes made.
+            """
+            
+            optimized_code = client.generate_code(optimization_prompt, st.session_state.current_language)
+            
+            st.subheader("الكود المحسن:")
+            st.code(optimized_code, language=st.session_state.current_language)
+            
+        except Exception as e:
+            st.error(f"خطأ في التحسين: {str(e)}")
