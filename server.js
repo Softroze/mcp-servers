@@ -504,7 +504,7 @@ async function analyzeBestSystemForTask(task) {
   try {
     const taskType = task.type || 'general';
     const complexity = task.complexity || 'medium';
-    
+
     const systemScores = {
       mcp: 0.8,
       autogen: taskType === 'conversation' ? 0.9 : 0.6,
@@ -840,6 +840,130 @@ const server = http.createServer(async (req, res) => {
 
     return;
   }
+
+  // نقطة نهاية متخصصة لطلبات البرمجة مع Blackbox AI
+  if (req.url === '/api/blackbox/code' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      try {
+        body += chunk.toString();
+      } catch (chunkError) {
+        console.error('خطأ في قراءة بيانات Blackbox:', chunkError.message);
+      }
+    });
+
+    req.on('end', async () => {
+      try {
+        console.log('📦 تلقي طلب Blackbox AI API');
+
+        if (!body || typeof body !== 'string' || body.trim() === '') {
+          throw new Error('لا توجد بيانات صالحة في طلب Blackbox');
+        }
+
+        let requestData;
+        try {
+          requestData = JSON.parse(body);
+        } catch (parseError) {
+          console.error('خطأ في تحليل JSON لـ Blackbox:', parseError.message);
+          throw new Error('خطأ في تحليل JSON: تأكد من أن البيانات بصيغة JSON صحيحة');
+        }
+
+        if (!requestData || typeof requestData !== 'object') {
+          throw new Error('بيانات Blackbox المحللة غير صالحة');
+        }
+
+        const { action, code, prompt, language, from_language, to_language, error_message } = requestData;
+
+        if (!action) {
+          throw new Error('يجب تحديد action لـ Blackbox');
+        }
+
+        if (!aiService) {
+          throw new Error('خدمة الذكاء الاصطناعي غير متاحة لـ Blackbox');
+        }
+
+        let result;
+
+        switch (action) {
+          case 'generate':
+            if (!prompt || typeof prompt !== 'string') throw new Error('المعلمة "prompt" مطلوبة لـ "generate"');
+            result = await aiService.sendRequest('blackbox', `Generate ${language || 'python'} code for: ${prompt}`, { type: 'code_generation' });
+            break;
+          case 'explain':
+            if (!code || typeof code !== 'string') throw new Error('المعلمة "code" مطلوبة لـ "explain"');
+            result = await aiService.sendRequest('blackbox', `Explain this code in detail:\n\n\`\`\`\n${code}\n\`\`\``, { type: 'code_explanation' });
+            break;
+          case 'debug':
+            if (!code || typeof code !== 'string') throw new Error('المعلمة "code" مطلوبة لـ "debug"');
+            result = await aiService.sendRequest('blackbox', `Debug this code and fix any issues:\n\nCode:\n\`\`\`\n${code}\n\`\`\`${error_message ? `\n\nError: ${error_message}` : ''}`, { type: 'code_debugging' });
+            break;
+          case 'optimize':
+            if (!code || typeof code !== 'string') throw new Error('المعلمة "code" مطلوبة لـ "optimize"');
+            result = await aiService.sendRequest('blackbox', `Optimize this code for better performance:\n\n\`\`\`\n${code}\n\`\`\``, { type: 'code_optimization' });
+            break;
+          case 'convert':
+            if (!code || typeof code !== 'string') throw new Error('المعلمة "code" مطلوبة لـ "convert"');
+            if (!from_language || typeof from_language !== 'string') throw new Error('المعلمة "from_language" مطلوبة لـ "convert"');
+            if (!to_language || typeof to_language !== 'string') throw new Error('المعلمة "to_language" مطلوبة لـ "convert"');
+            result = await aiService.sendRequest('blackbox', `Convert this ${from_language} code to ${to_language}:\n\n\`\`\`${from_language}\n${code}\n\`\`\``, { type: 'code_conversion' });
+            break;
+          default:
+            throw new Error(`نوع العملية غير مدعوم في Blackbox. الأنواع المتاحة: generate, explain, debug, optimize, convert`);
+        }
+
+        res.writeHead(200, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
+
+        const responseData = {
+          success: true,
+          result: result,
+          action: action,
+          timestamp: new Date()
+        };
+
+        res.end(JSON.stringify(responseData, null, 2));
+        console.log('✅ تم إرسال استجابة Blackbox بنجاح');
+
+      } catch (error) {
+        console.error('❌ خطأ في Blackbox API:', error.message);
+        console.error('🔍 التفاصيل:', error.stack || 'لا توجد تفاصيل إضافية');
+
+        try {
+          res.writeHead(500, {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': '*'
+          });
+          const errorResponse = {
+            success: false,
+            error: error.message || 'خطأ غير متوقع في Blackbox',
+            details: 'تأكد من صحة البيانات المرسلة وأن مفاتيح API صحيحة',
+            timestamp: new Date().toISOString()
+          };
+          res.end(JSON.stringify(errorResponse, null, 2));
+        } catch (responseError) {
+          console.error('❌ خطأ في إرسال رسالة الخطأ لـ Blackbox:', responseError.message);
+          res.end('{"success":false,"error":"خطأ جوهري في الخادم"}');
+        }
+      }
+    });
+
+    req.on('error', (reqError) => {
+      console.error('❌ خطأ في طلب Blackbox:', reqError.message);
+      try {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end('{"success":false,"error":"خطأ في الطلب"}');
+      } catch (err) {
+        console.error('خطأ في معالجة خطأ الطلب لـ Blackbox:', err.message);
+      }
+    });
+
+    return;
+  }
+
 
   // GET API للوكلاء
   if (req.method === 'GET' && req.url === '/api/agents') {

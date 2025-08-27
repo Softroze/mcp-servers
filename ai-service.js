@@ -30,6 +30,7 @@ class AIService {
     if (AI_CONFIG.google?.apiKey) providers.push('google');
     if (AI_CONFIG.huggingface?.token) providers.push('huggingface');
     if (AI_CONFIG.openrouter?.apiKey) providers.push('openrouter');
+    if (AI_CONFIG.blackbox?.apiKey) providers.push('blackbox');
 
     return providers;
   }
@@ -79,6 +80,9 @@ class AIService {
           break;
         case 'openrouter':
           result = await this.callOpenRouter(client, message, options);
+          break;
+        case 'blackbox':
+          result = await this.callBlackbox(client, message, options);
           break;
         default:
           throw new Error(`مزود غير مدعوم: ${provider}`);
@@ -233,6 +237,44 @@ class AIService {
     if (!data || !data.choices || !data.choices[0]) {
       throw new Error('استجابة غير صحيحة من OpenAI');
     }
+    return data.choices[0].message.content;
+  }
+
+  // استدعاء Blackbox AI (متخصص في البرمجة)
+  async callBlackbox(client, message, options) {
+    const isCodeRequest = options.type === 'code' || 
+                         message.includes('code') || 
+                         message.includes('function') ||
+                         message.includes('script') ||
+                         message.includes('program');
+
+    const model = isCodeRequest ? client.models.blackboxCode : client.models.blackboxChat;
+
+    const response = await fetch(`${client.baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${client.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: 'user', content: message }],
+        max_tokens: options.maxTokens || 2000,
+        temperature: options.temperature || (isCodeRequest ? 0.1 : 0.7),
+        stream: false
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Blackbox AI API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    if (!data || !data.choices || !data.choices[0]) {
+      throw new Error('استجابة غير صحيحة من Blackbox AI');
+    }
+    
     return data.choices[0].message.content;
   }
 }

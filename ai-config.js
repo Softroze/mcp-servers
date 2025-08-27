@@ -1,4 +1,3 @@
-
 // تكوين نماذج الذكاء الاصطناعي
 const AI_CONFIG = {
   // OpenAI Configuration
@@ -43,17 +42,17 @@ const AI_CONFIG = {
       mistral: 'mistralai/Mistral-7B-Instruct-v0.1',
       phi3: 'microsoft/Phi-3-mini-4k-instruct',
       gemma: 'google/gemma-7b-it',
-      
+
       // نماذج الدردشة والمحادثة
       chatglm: 'THUDM/chatglm3-6b',
       baichuan: 'baichuan-inc/Baichuan2-7B-Chat',
       qwen: 'Qwen/Qwen1.5-7B-Chat',
-      
+
       // نماذج متخصصة
       codellama: 'codellama/CodeLlama-7b-Instruct-hf',
       zephyr: 'HuggingFaceH4/zephyr-7b-beta',
       vicuna: 'lmsys/vicuna-7b-v1.5',
-      
+
       // نماذج صغيرة وسريعة
       tinyllama: 'TinyLlama/TinyLlama-1.1B-Chat-v1.0',
       stablelm: 'stabilityai/stablelm-2-zephyr-1_6b'
@@ -66,18 +65,20 @@ const AI_CONFIG = {
     baseURL: 'https://openrouter.ai/api/v1',
     models: {
       // نماذج مجانية من OpenRouter
-      llama3Free: 'meta-llama/llama-3-8b-instruct:free',
+      llama3Free: 'meta-llama/llama-3.1-8b-instruct:free',
+      qwen2Free: 'qwen/qwen-2-7b-instruct:free',
       mistralFree: 'mistralai/mistral-7b-instruct:free',
-      codellama: 'codellama/codellama-34b-instruct:free',
-      
-      // نماذج قوية مجانية
-      mythomaxFree: 'gryphe/mythomix-8x7b:free',
-      toppy: 'undi95/toppy-m-7b:free',
-      capybara: 'nousresearch/nous-capybara-7b:free',
-      
-      // نماذج للتطبيقات المختلفة
-      openchat: 'openchat/openchat-7b:free',
-      neural: 'intel/neural-chat-7b:free'
+      phi3Free: 'microsoft/phi-3-mini-128k-instruct:free'
+    }
+  },
+
+  // Blackbox AI Configuration
+  blackbox: {
+    apiKey: process.env.BLACKBOX_API_KEY,
+    baseURL: 'https://api.blackbox.ai/v1',
+    models: {
+      blackboxCode: 'blackbox-code',
+      blackboxChat: 'blackbox'
     }
   },
 
@@ -95,36 +96,45 @@ const AI_CONFIG = {
 function validateAPIKeys() {
   const missing = [];
   const available = [];
-  
+
   if (!AI_CONFIG.openai.apiKey) missing.push('OPENAI_API_KEY');
   else available.push('OpenAI');
-  
+
   if (!AI_CONFIG.anthropic.apiKey) missing.push('ANTHROPIC_API_KEY');
   else available.push('Anthropic');
-  
+
   if (!AI_CONFIG.google.apiKey) missing.push('GOOGLE_API_KEY');
   else available.push('Google');
-  
+
   if (!AI_CONFIG.huggingface.token) missing.push('HUGGINGFACE_API_TOKEN');
   else available.push('Hugging Face (FREE)');
-  
-  if (!AI_CONFIG.openrouter.apiKey) missing.push('OPENROUTER_API_KEY');
-  else available.push('OpenRouter (FREE)');
-  
+
+  if (AI_CONFIG.openrouter?.apiKey) {
+    available.push('OpenRouter (FREE)');
+  } else {
+    missing.push('OPENROUTER_API_KEY');
+  }
+
+  if (AI_CONFIG.blackbox?.apiKey) {
+    available.push('Blackbox AI (CODE)');
+  } else {
+    missing.push('BLACKBOX_API_KEY');
+  }
+
   console.log('🤖 النماذج المتاحة:');
   if (available.length > 0) {
     console.log('✅ متوفر:', available.join(', '));
   }
-  
+
   if (missing.length > 0) {
     console.warn('⚠️  المفاتيح المفقودة:', missing.join(', '));
     console.warn('📝 يرجى إضافة هذه المفاتيح في قسم Secrets للوصول لمزيد من النماذج');
   }
-  
+
   if (available.includes('Hugging Face (FREE)') || available.includes('OpenRouter (FREE)')) {
     console.log('🎉 لديك وصول للنماذج المجانية القوية!');
   }
-  
+
   return missing;
 }
 
@@ -161,6 +171,12 @@ function createAIClient(provider) {
         baseURL: AI_CONFIG.openrouter.baseURL,
         models: AI_CONFIG.openrouter.models
       };
+    case 'blackbox':
+      return {
+        apiKey: AI_CONFIG.blackbox.apiKey,
+        baseURL: AI_CONFIG.blackbox.baseURL,
+        models: AI_CONFIG.blackbox.models
+      };
     default:
       throw new Error(`مزود غير مدعوم: ${provider}`);
   }
@@ -175,7 +191,7 @@ function getBestFreeModel() {
       name: 'Llama 3 8B (مجاني)'
     };
   }
-  
+
   if (AI_CONFIG.openrouter.apiKey) {
     return {
       provider: 'openrouter',
@@ -183,7 +199,7 @@ function getBestFreeModel() {
       name: 'Llama 3 8B OpenRouter (مجاني)'
     };
   }
-  
+
   return null;
 }
 
